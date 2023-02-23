@@ -1,13 +1,35 @@
 const APP = {
   currentPage: "home",
+  constants: {
+    dataCache: "ULUT0002_DATA",
+    pageCache: "ULUT0002_PAGE",
+  },
+  data: {
+    //Single source of data
+  },
   init() {
     //page has loaded
   },
   addListeners() {
     //add DOM listeners
   },
-  navigate(page) {
+  navigate(page = "home") {
     //navigate to a new page
+    page = page.toLowerCase();
+    switch (page) {
+      case "home":
+        break;
+      case "add_person":
+        break;
+      case "list_gifts":
+        break;
+      case "add_gift":
+        break;
+
+      default: //back to home
+        APP.navigate("");
+        break;
+    }
   },
 };
 
@@ -52,7 +74,23 @@ function randomNum(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+function saveUsersIntoCache() {
+  if (caches.has(APP.data.constants.user_cache)) {
+  }
+}
+
 // console.log("User: ", test_createDummyUser());
 testCreateDummyUsers();
+saveDummyDataIntoCache();
+
+function saveDummyDataIntoCache() {
+  test_UserArray.forEach((user) => {
+    caches.open(APP.constants.dataCache).then((cache) => {
+      if (cache) {
+        cache.put(`${user.id}.json`, new Response(JSON.stringify(user)));
+      }
+    });
+  });
+}
 
 console.log(test_UserArray);
