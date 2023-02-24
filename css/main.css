@@ -1,14 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
 :root {
   --homebg: #e4e4e4;
   --hometxt: #222;
-  --gorillabg: #222;
-  --gorillatxt: #e4e4e4;
-  --bananabg: #f2f764;
-  --bananatxt: #4c1c0f;
-  --waterbg: #3398ef;
-  --watertxt: #d6e3ee;
+  --add_edit_personbg: #222;
+  --add_edit_persontxt: #e4e4e4;
+  --gift_ideasbg: #f2f764;
+  --gift_ideastxt: #4c1c0f;
+  --add_edit_giftbg: #3398ef;
+  --add_edit_gifttxt: #d6e3ee;
   --badass: #bada55;
-  --defaultfontstack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --defaultfontstack: Figtree, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+    sans-serif;
+
+  --text-light: #ffffea;
+  --text-dark: #2c363f;
+  --edit-bg-color: hsl(139, 17%, 27%);
+  --edit-bg-color2: hsl(139, 17%, 17%);
+
+  --gift-bg-color: hsl(281, 41%, 78%);
+  --gift-bg-color2: hsl(281, 41%, 68%);
+
+  --font-h1: 1.802rem;
+  --font-h2: 1.602rem;
+  --font-h3: 1.424rem;
+  --font-h4: 1.266rem;
+  --font-h5: 1.125rem;
+  --font-small: 0.889rem;
 }
 * {
   box-sizing: border-box;
@@ -20,21 +39,42 @@ html {
   font-family: var(--defaultfontstack);
   font-weight: 300;
 }
+
+h1 {
+  font-size: var(--font-h1);
+}
+
+h2 {
+  font-size: var(--font-h2);
+}
+
+h3 {
+  font-size: var(--font-h3);
+}
+
+h4 {
+  font-size: var(--font-h4);
+}
+
+h5 {
+  font-size: var(--font-h5);
+}
+
 body.home {
   background-color: var(--homebg);
   color: var(--hometxt);
 }
-body.gorilla {
-  background-color: var(--gorillabg);
-  color: var(--gorillatxt);
+body.add_edit_person {
+  background-color: var(--add_edit_personbg);
+  color: var(--add_edit_persontxt);
 }
-body.banana {
-  background-color: var(--bananabg);
-  color: var(--bananatxt);
+body.gift_ideas {
+  background-color: var(--gift_ideasbg);
+  color: var(--gift_ideastxt);
 }
-body.water {
-  background-color: var(--waterbg);
-  color: var(--watertxt);
+body.add_edit_gift {
+  background-color: var(--add_edit_giftbg);
+  color: var(--add_edit_gifttxt);
 }
 header {
   min-height: 4rem;
@@ -76,9 +116,9 @@ main {
   padding: 5rem 1rem 1rem 1rem; /* 5rem to leave space for the header */
 }
 body.home main#home,
-body.gorilla main#gorilla,
-body.banana main#banana,
-body.water main#water {
+body.add_edit_person main#add_edit_person,
+body.gift_ideas main#gift_ideas,
+body.add_edit_gift main#add_edit_gift {
   display: block;
 }
 
@@ -88,9 +128,107 @@ body.home header .back {
 body.home header .add {
   display: grid;
 }
-body.gorilla header .back {
+body.add_edit_person header .back {
   display: grid;
 }
-body.gorilla header .add {
+body.add_edit_person header .add {
   display: none;
+}
+
+.person--container {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.person--container .person--list--item {
+  border: 1px solid gray;
+  display: grid;
+  grid-template-columns: 1fr repeat(2, minmax(min-content, max-content));
+  grid-template-rows: repeat(2, minmax(min-content, max-content));
+
+  /* grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr); */
+}
+
+.person--container .person--name {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+}
+
+.person--container .person--dob {
+  grid-column: 1 / 2;
+  grid-row: 2 / -1;
+}
+
+.button--container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.person--container .edit--button--container {
+  grid-column: 2 / 3;
+  grid-row: 1 / -1;
+}
+
+.person--container .gift--button--container {
+  grid-column: 3 / 4;
+  grid-row: 1 / -1;
+}
+
+/* btn person--edit--btn */
+.btn {
+  display: block;
+  border: 1px solid black;
+  font-size: 3rem;
+  border-radius: 0.25rem;
+  -webkit-border-radius: 0.25rem;
+  -moz-border-radius: 0.25rem;
+  -ms-border-radius: 0.25rem;
+  -o-border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.edit-btn {
+  background-color: var(--edit-bg-color);
+  border-color: var(--edit-bg-color);
+  color: var(--text-light);
+}
+
+.edit-btn:hover {
+  background-color: var(--edit-bg-color2);
+}
+
+.gift-btn {
+  background-color: var(--gift-bg-color);
+  border-color: var(--gift-bg-color);
+  color: var(--text-dark);
+}
+
+.gift-btn:hover {
+  background-color: var(--gift-bg-color2);
+}
+
+@media only screen and (min-width: 45rem) {
+  :root {
+    --font-h1: 2.488rem;
+    --font-h2: 2.074rem;
+    --font-h3: 1.728rem;
+    --font-h4: 1.44rem;
+    --font-h5: 1.2rem;
+    --font-small: 0.883rem;
+  }
+}
+
+@media only screen and (min-width: 60rem) {
+  :root {
+    --font-h1: 3.052rem;
+    --font-h2: 2.441rem;
+    --font-h3: 1.953rem;
+    --font-h4: 1.563rem;
+    --font-h5: 1.25rem;
+    --font-small: 0.8rem;
+  }
 }
