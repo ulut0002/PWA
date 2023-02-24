@@ -30,25 +30,87 @@
   <body class="home">
     <header>
       <p>
-        <span class="back"> &lt; </span>
+        <span class="back" data-giftr_action="go_back"> &lt; </span>
       </p>
       <h1>Some App</h1>
       <p>
-        <span class="add"> + </span>
+        <span class="add" data-giftr_action="add_record"> + </span>
       </p>
     </header>
     <main id="home">
       <h2>Friends and Family</h2>
       <div id="people-list" class="people-list"></div>
     </main>
-    <main id="add_edit_person">
-      <h2>Add Person screen</h2>
+
+    <main id="add_edit_person" data-giftr="data_source">
+      <div class="container">
+        <h2 class="title">Edit Person</h2>
+
+        <div class="name__container">
+          <label for="name">Name</label>
+          <input type="text" name="name" id="name" />
+        </div>
+        <div class="dob__container">
+          <label for="dob">Date of Birth</label>
+          <input type="date" name="dob" id="dob" />
+        </div>
+
+        <div class="text-btn save-btn" data-giftr_action="save_person">
+          <span class="material-symbols-outlined text-btn-icon">save</span>Save
+        </div>
+        <div class="text-btn delete-btn" data-giftr_action="delete_person">
+          <span class="material-symbols-outlined text-btn-icon">delete</span
+          >Delete
+        </div>
+
+        <div
+          class="text-btn cancel-btn"
+          data-giftr_action="cancel_add_edit_person"
+        >
+          <span class="material-symbols-outlined text-btn-icon">cancel</span
+          >cancel
+        </div>
+        <div class="text-btn download-btn" data-giftr_action="download_person">
+          <span class="material-symbols-outlined text-btn-icon">download</span
+          >Download
+        </div>
+      </div>
     </main>
     <main id="gift_ideas">
-      <h2>The List Gifts Screen</h2>
+      <h2>Gift ideas</h2>
+      <div class="container"></div>
     </main>
     <main id="add_edit_gift">
       <h2>Add Gift Screen</h2>
+      <div class="container">
+        <div class="idea_container">
+          <label for="name">Gift idea</label>
+          <input type="text" name="name" id="gift_name" />
+        </div>
+        <div class="store_container">
+          <label for="store">Store | Location</label>
+          <input type="text" name="store" id="gift_store" />
+        </div>
+        <div class="url_container">
+          <label for="url">URL</label>
+          <input type="url" name="url" id="gift_url" />
+        </div>
+
+        <div
+          class="text-btn cancel-btn"
+          data-giftr_action="cancel_add_edit_person"
+        >
+          <span class="material-symbols-outlined text-btn-icon">save</span>Save
+        </div>
+
+        <div
+          class="text-btn cancel-btn"
+          data-giftr_action="cancel_add_edit_person"
+        >
+          <span class="material-symbols-outlined text-btn-icon">cancel</span
+          >Cancel
+        </div>
+      </div>
     </main>
   </body>
 </html>

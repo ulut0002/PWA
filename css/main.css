@@ -135,6 +135,13 @@ body.add_edit_person header .add {
   display: none;
 }
 
+body.add_edit_person .container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(min-content, max-content);
+  /* flex-direction: column; */
+}
+
 .person--container {
   list-style-type: none;
   display: flex;
@@ -189,6 +196,27 @@ body.add_edit_person header .add {
   -ms-border-radius: 0.25rem;
   -o-border-radius: 0.25rem;
   cursor: pointer;
+}
+
+.text-btn {
+  display: block;
+  border: 1px solid black;
+  font-size: var(--font-h5);
+  border-radius: 0.25rem;
+  -webkit-border-radius: 0.25rem;
+  -moz-border-radius: 0.25rem;
+  -ms-border-radius: 0.25rem;
+  -o-border-radius: 0.25rem;
+
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: var(--font-h3);
+}
+
+.text-btn-icon {
+  display: block;
+  font-size: var(--font-h2);
 }
 
 .edit-btn {
