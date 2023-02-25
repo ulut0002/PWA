@@ -96,9 +96,12 @@ select {
 /* CSS RESET ENDS */
 
 :root {
+  --btn-box-shadow: 0px 0.25rem 0.5rem hwb(0 51% 49%);
   --homebg: #e4e4e4;
   --hometxt: #222;
-  --hometxt2: #5b3f02;
+  --home-btn-text: #e4e4e4;
+  --home-btn-bg: hsl(41, 96%, 18%);
+  --home-btn-bg2: hsl(41, 96%, 28%);
 
   --add_edit_personbg: #d8d78f;
   --add_edit_persontxt: #432c2b;
@@ -312,28 +315,30 @@ body.add_edit_gift .container {
   font-size: var(--font-small);
 }
 
-.person--container {
+.list--container {
   list-style-type: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.person--container .person--list--item {
-  /* margin-top: 1rem; */
+.list--container--item {
   border-top: 0.0625rem solid gray;
   border-radius: 0.15rem;
   display: grid;
-  grid-template-columns: 1fr repeat(2, minmax(min-content, max-content));
-  grid-template-rows: repeat(2, minmax(min-content, max-content));
-  /*grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  */
   -webkit-border-radius: 0.15rem;
   -moz-border-radius: 0.15rem;
   -ms-border-radius: 0.15rem;
   -o-border-radius: 0.15rem;
   padding: 1rem 0;
+}
+
+.person--container {
+}
+
+.person--container .person--list--item {
+  grid-template-columns: 1fr repeat(2, minmax(min-content, max-content));
+  grid-template-rows: repeat(2, minmax(min-content, max-content));
 }
 
 .person--container .person--list--item:hover {
@@ -423,12 +428,13 @@ body.add_edit_gift .container {
   -ms-border-radius: 0.25rem;
   -o-border-radius: 0.25rem;
   cursor: pointer;
+  margin-left: 0.5rem;
 }
 
 .text-btn {
   display: block;
   border: 1px solid black;
-  font-size: var(--font-h5);
+  font-size: var(--font-h6);
   border-radius: 0.25rem;
   -webkit-border-radius: 0.25rem;
   -moz-border-radius: 0.25rem;
@@ -446,8 +452,20 @@ body.add_edit_gift .container {
 
 .text-btn-icon {
   display: block;
-  /* font-weight: bold; */
   font-size: var(--font-h2);
+}
+
+.home_page_btn {
+  background-color: var(--home-btn-bg);
+  border: 0.0625rem solid var(--home-btn-bg);
+  color: var(--home-btn-text);
+}
+
+.home_page_btn:hover {
+  background-color: var(--home-btn-bg2);
+  border: 0.0625rem solid var(--home-btn-bg2);
+  color: var(--home-btn-text);
+  box-shadow: var(--btn-box-shadow);
 }
 
 .add_person_page_btn {

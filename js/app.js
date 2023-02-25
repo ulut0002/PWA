@@ -151,6 +151,7 @@ const APP = {
       },
       rebuildList() {
         const container = APP.pages.home.dom.container;
+
         let html = "";
         if (!container) return;
         container.innerHTML = "";
@@ -165,22 +166,29 @@ const APP = {
               UTIL.convertToCurrentYear(p2.dob)
             );
           });
-          html = `<ul class="person--container">`;
+          html = `<ul class="list--container person--container">`;
           html += APP.data.sst
             .map((person) => {
               // console.log(pe);
+              let giftCount = Array.isArray(person.gifts)
+                ? person.gifts.length
+                : 0;
+
+              const giftCountText =
+                giftCount > 0 ? `${giftCount} gifts` : "No gifts yet";
+
               return `<li data-giftr="data_source" data-id="${
                 person.id
-              }" data-source="person" class="person--list--item" >
+              }" data-source="person" class="list--container--item person--list--item" >
                   <h2 class="person--name">${person.name}</h2>
                   <h3 class="person--dob">${UTIL.getBirthDateText(
                     person.dob
-                  )}</h3>
-                  <div data-giftr_action="edit_person" class="button--container edit--button--container">
-                    <span class="material-symbols-outlined btn  edit-btn">edit</span>
+                  )} | ${giftCountText}</h3>
+                  <div data-giftr_action="edit_person" class="button--container edit--button--container ">
+                    <span class="material-symbols-outlined btn home_page_btn">edit</span>
                   </div>
                   <div data-giftr_action="list_gifts" class="button--container gift--button--container">
-                  <span class="material-symbols-outlined btn gift-btn">redeem</span>
+                  <span class="material-symbols-outlined btn home_page_btn">redeem</span>
                   </div>
                 </li>`;
             })
@@ -228,7 +236,7 @@ const APP = {
         const dom = APP.pages.add_edit_person.dom;
         dom.title.innerHTML = "Add New Person";
         if (APP.currentPerson && APP.currentPerson.name) {
-          dom.title.innerHTML = `Edit ${APP.currentPerson.name}`;
+          dom.title.innerHTML = `Edit "${APP.currentPerson.name}"`;
         }
         dom.name.value = APP.currentPerson.name;
         dom.main.setAttribute("data-id", APP.currentPerson.id);
@@ -349,10 +357,10 @@ const APP = {
           Array.isArray(APP.currentPerson.gifts) &&
           APP.currentPerson.gifts.length > 0
         ) {
-          html += `<ul class="gift--container">`;
+          html += `<ul class="list--container  gift--container">`;
           html += APP.currentPerson.gifts
             .map((gift) => {
-              return `<li data-giftr="data_source" data-id="${gift.id}" data-source="gift" class="gift--list--item" >
+              return `<li data-giftr="data_source" data-id="${gift.id}" data-source="gift" class="list--container--item gift--list--item" >
                   <h2 class="gift--name">${gift.name}</h2>
                   <h3 class="gift--store">${gift.store}</h3>
                   <h3 class="gift--url">${gift.url}</h3>
