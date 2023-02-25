@@ -8,3 +8,6 @@ const d2 = new Date(int);
 
 console.log(date.getTime(), date.toDateString());
 console.log(d2.getTime(), d2.toDateString());
+
+const url = new URL("https://www.google.com");
+console.log(url);

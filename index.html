@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0"
     />
     <link rel="stylesheet" href="./css/main.css" />
-    <script src="./js/app.js" defer></script>
+    <script src="./js/app.js" type="module"></script>
   </head>
   <!-- material icons to use:
 
@@ -39,6 +39,8 @@
     </header>
     <main id="home">
       <h2 class="title">Friends and Family</h2>
+      <div id="error-container" class="error__container"></div>
+
       <div id="home__container">
         <!-- each user will be listed inside this div -->
       </div>
@@ -47,6 +49,8 @@
     <main id="add_edit_person" data-giftr="data_source">
       <div class="container">
         <h2 class="title">Edit Person</h2>
+
+        <div id="error-container" class="error__container"></div>
 
         <div class="name__container">
           <label for="name">Name</label>
@@ -89,10 +93,13 @@
     </main>
     <main id="gift_ideas">
       <h2 class="title">Gift ideas</h2>
+      <div id="error-container" class="error__container"></div>
+
       <div class="container"></div>
     </main>
     <main id="add_edit_gift">
       <h2>Add Gift Screen</h2>
+      <div id="error-container" class="error__container"></div>
       <div class="container">
         <div class="idea_container">
           <label for="name">Gift idea</label>
@@ -109,11 +116,6 @@
 
         <div class="text-btn save-btn" data-giftr_action="save_new_gift">
           <span class="material-symbols-outlined text-btn-icon">save</span>Save
-        </div>
-
-        <div class="text-btn delete-btn" data-giftr_action="delete_gift">
-          <span class="material-symbols-outlined text-btn-icon">delete</span
-          >Delete
         </div>
 
         <div class="text-btn cancel-btn" data-giftr_action="cancel_new_gift">

@@ -1,4 +1,5 @@
 const log = console.log;
+import MessageBox from "./message.js";
 
 //Utility functions for the APP object
 const UTIL = {
@@ -43,8 +44,32 @@ const UTIL = {
   getFilename(id) {
     return `${id}.giftr`;
   },
+  parseTextToURL(value) {
+    if (!value) return "";
+    if (typeof value !== "string") return "";
+    let lo_case = value.toLowerCase();
+    if (!lo_case.startsWith("http")) {
+      lo_case = "https://" + lo_case;
+    }
+    try {
+      if (!lo_case.includes(".")) throw Error("");
+      const url = new URL(lo_case);
+      return { value: url.href, validURL: true };
+    } catch (error) {
+      return { value: value, validURL: false };
+    }
+  },
 };
 
+//this must be on the root level to work with window["name"].("param") function call
+
+document.addEventListener("closeMessage", (ev) => {
+  ev.stopPropagation();
+  DOM_UTIL.closeMessage(ev.detail.msgId);
+  // console.log(ev.detail);
+});
+
+// Utilitiy functions for the DOM object
 const DOM_UTIL = {
   showHideDomElement(element, hide) {
     if (!element) return;
@@ -52,12 +77,67 @@ const DOM_UTIL = {
     if (hide) element.classList.add("visually-hidden");
     else element.classList.remove("visually-hidden");
   },
+  closeMessage(id) {
+    // console.log(`close message box with id ${id}`);
+    const msg = document.querySelector(`div[msgId='${id}']`);
+    if (msg) msg.remove();
+  },
+  displayError(errorContainerDiv, title, message, type) {
+    if (!errorContainerDiv) {
+      return;
+    }
+    const newErrorMsg = DOM_UTIL.createMessageElement(title, message, type);
+    errorContainerDiv.innerHTML = "";
+    errorContainerDiv.append(newErrorMsg);
+  },
+  createMessageElement(title, message, type) {
+    const msgID = crypto.randomUUID();
+    const wrapper = document.createElement("div");
+    wrapper.setAttribute("msgId", msgID);
+
+    const msg = document.createElement("message-box");
+    msg.setAttribute("action", "closeMessage");
+    msg.setAttribute("type", type);
+    msg.setAttribute("msgId", msgID); // will be used for the close button
+
+    msg.classList.add("message--box");
+
+    if (title) {
+      const el = document.createElement("h3");
+      el.setAttribute("slot", "title");
+      el.classList.add("list--item--text_small");
+      el.innerHTML = message;
+      p.append(el);
+    }
+
+    const p = document.createElement("p");
+    p.setAttribute("slot", "message");
+    p.textContent = message;
+    msg.append(p);
+
+    const btn = document.createElement("span");
+    btn.setAttribute("slot", "done");
+    btn.textContent = "OK";
+    msg.append(btn);
+
+    wrapper.append(msg);
+
+    return wrapper;
+  },
 };
 
 const APP = {
   currentPage: "home",
   currentPerson: undefined,
   currentGift: undefined,
+  MESSAGES: {
+    ERROR: "error",
+    WARNING: "warning",
+    INFO: "info",
+    SUCCESS: "success",
+    DEV_ERROR_TITLE: "Attention to Developer",
+    DEV_ERROR_MESSAGE: "This error should not have happened. ",
+  },
   CACHE: {
     dataCache: "ULUT0002_DATA",
     pageCache: "ULUT0002_PAGE",
@@ -141,15 +221,22 @@ const APP = {
       dom: {
         main: undefined,
         container: undefined,
+        errorContainer: undefined,
       },
       readDom() {
         const main = document.getElementById("home");
         if (main) {
           APP.pages.home.dom.main = main;
           APP.pages.home.dom.container = main.querySelector("#home__container");
+          APP.pages.home.dom.errorContainer =
+            main.querySelector("#error-container");
         }
       },
+      removeError() {
+        APP.pages.home.dom.errorContainer.innerHTML = "";
+      },
       rebuildList() {
+        APP.pages.home.removeError();
         const container = APP.pages.home.dom.container;
 
         let html = "";
@@ -174,16 +261,22 @@ const APP = {
                 ? person.gifts.length
                 : 0;
 
-              const giftCountText =
-                giftCount > 0 ? `${giftCount} gifts` : "No gifts yet";
+              let giftCountText = "No gifts yet";
+              if (giftCount === 1) {
+                giftCountText = "1 gift only";
+              } else {
+                giftCountText = `${giftCount} gifts`;
+              }
 
               return `<li data-giftr="data_source" data-id="${
                 person.id
               }" data-source="person" class="list--container--item person--list--item" >
-                  <h2 class="person--name">${person.name}</h2>
-                  <h3 class="person--dob">${UTIL.getBirthDateText(
+                  <h2 class="list--item--text_xl person--name">${
+                    person.name
+                  }</h2>
+                  <h3 class=" list--item--text_small person--dob">${UTIL.getBirthDateText(
                     person.dob
-                  )} | ${giftCountText}</h3>
+                  )} &nbsp;|&nbsp;  ${giftCountText}</h3>
                   <div data-giftr_action="edit_person" class="button--container edit--button--container ">
                     <span class="material-symbols-outlined btn home_page_btn">edit</span>
                   </div>
@@ -203,6 +296,9 @@ const APP = {
       },
     },
     add_edit_person: {
+      MESSAGES: {
+        MANDATORY_FIELDS: "Enter valid name and date of birth",
+      },
       id: "add_edit_person",
       dom: {
         main: undefined,
@@ -211,6 +307,7 @@ const APP = {
         dob: undefined,
         deleteBtn: undefined,
         downloadBtn: undefined,
+        errorContainer: undefined,
       },
       readDom() {
         const main = document.getElementById("add_edit_person");
@@ -221,6 +318,7 @@ const APP = {
           dom.dob = main.querySelector("#dob");
           dom.deleteBtn = main.querySelector(".delete-btn");
           dom.downloadBtn = main.querySelector(".download-btn");
+          dom.errorContainer = main.querySelector("#error-container");
           dom.main = main;
         }
       },
@@ -232,7 +330,11 @@ const APP = {
         const dom = APP.pages.add_edit_person.dom;
         return dom.dob.value.trim();
       },
+      removeError() {
+        APP.pages.add_edit_person.dom.errorContainer.innerHTML = "";
+      },
       buildPage() {
+        APP.pages.add_edit_person.removeError();
         const dom = APP.pages.add_edit_person.dom;
         dom.title.innerHTML = "Add New Person";
         if (APP.currentPerson && APP.currentPerson.name) {
@@ -254,7 +356,12 @@ const APP = {
         const { dataSource } = params;
         APP.assignCurrentPerson(dataSource.dataset.id);
         if (!APP.currentPerson) {
-          //display error
+          DOM_UTIL.displayError(
+            dom.errorContainer,
+            APP.MESSAGES.DEV_ERROR_TITLE,
+            APP.MESSAGES.DEV_ERROR_MESSAGE,
+            APP.MESSAGES.ERROR
+          );
           return;
         }
         APP.navigate("add_edit_person");
@@ -266,6 +373,7 @@ const APP = {
       saveNewPerson() {
         const name = APP.pages.add_edit_person.getName();
         const dobText = APP.pages.add_edit_person.getDOB();
+        const dom = APP.pages.add_edit_person.dom;
 
         let dob = undefined;
         try {
@@ -276,6 +384,12 @@ const APP = {
 
         if (!name || !dob) {
           //return / show error
+          DOM_UTIL.displayError(
+            dom.errorContainer,
+            "",
+            APP.pages.add_edit_person.MESSAGES.MANDATORY_FIELDS,
+            APP.MESSAGES.ERROR
+          );
           console.log("name and dob are mandatory");
           return;
         }
@@ -335,6 +449,7 @@ const APP = {
         main: undefined,
         container: undefined,
         title: undefined,
+        errorContainer: undefined,
       },
       readDom() {
         const main = document.getElementById("gift_ideas");
@@ -342,9 +457,15 @@ const APP = {
           APP.pages.gift_ideas.dom.main = main;
           APP.pages.gift_ideas.dom.container = main.querySelector(".container");
           APP.pages.gift_ideas.dom.title = main.querySelector("h2");
+          APP.pages.gift_ideas.dom.errorContainer =
+            main.querySelector("#error-container");
         }
       },
+      removeError() {
+        APP.pages.gift_ideas.dom.errorContainer.innerHTML = "";
+      },
       buildPage() {
+        APP.pages.gift_ideas.removeError();
         const dom = APP.pages.gift_ideas.dom;
         const container = dom.container;
         if (!container) {
@@ -360,10 +481,16 @@ const APP = {
           html += `<ul class="list--container  gift--container">`;
           html += APP.currentPerson.gifts
             .map((gift) => {
+              let result = UTIL.parseTextToURL(gift.url);
+              let href =
+                result.validURL == true
+                  ? `<a href="${result.value}" target="_blank">${gift.url}</a>`
+                  : `${gift.url}`;
+
               return `<li data-giftr="data_source" data-id="${gift.id}" data-source="gift" class="list--container--item gift--list--item" >
-                  <h2 class="gift--name">${gift.name}</h2>
-                  <h3 class="gift--store">${gift.store}</h3>
-                  <h3 class="gift--url">${gift.url}</h3>
+                  <h2 class="list--item--text_xl gift--name">${gift.name}</h2>
+                  <h3 class="list--item--text_small gift--store">Store: ${gift.store}</h3>
+                  <h3 class="list--item--text_small gift--url">${href}</h3>
                   <div data-giftr_action="edit_gift" class="button--container edit--button--container">
                     <span class="material-symbols-outlined btn  edit-btn">edit</span>
                   </div>
@@ -386,6 +513,69 @@ const APP = {
         APP.assignCurrentPerson(dataSource.dataset.id);
         APP.navigate("gift_ideas");
       },
+      editGift(param) {
+        const { dataSource } = param;
+        const giftID = dataSource.dataset.id;
+        const personID = APP.currentPerson.id;
+
+        let giftIndex = -1;
+
+        try {
+          giftIndex = APP.currentPerson.gifts.findIndex(
+            (gift) => gift.id === giftID
+          );
+        } catch (error) {}
+        //
+        if (giftIndex >= 0) {
+          APP.currentGift = {
+            ...APP.currentPerson.gifts[giftIndex],
+            newEntry: false,
+          };
+          APP.navigate("add_edit_gift");
+        }
+      },
+      deleteGift(param) {
+        // Update the cache first, and then update the SST array data.
+
+        const { dataSource } = param;
+        const giftID = dataSource.dataset.id;
+        const personID = APP.currentPerson.id;
+        // console.log("delete gift id", dataSource.dataset.id, "from", personID);
+        if (!giftID || !personID) {
+          //display error
+          return;
+        }
+        const personIdx = APP.data.sst.findIndex(
+          (person) => person.id === personID
+        );
+
+        if (personIdx < 0) {
+          //display error
+          return;
+        }
+
+        const copy = APP.data.sst[personIdx];
+
+        let giftIdx = -1;
+        if (copy.gifts && Array.isArray(copy.gifts) && copy.gifts.length > 0) {
+          giftIdx = copy.gifts.findIndex((gift) => (gift.id = giftID));
+        }
+        // log(giftIdx, giftID);
+        if (giftIdx >= 0) {
+          copy.gifts.splice(giftIdx, 1);
+        }
+        // console.log(copy.gifts);
+        APP.data.cacheRef
+          .put(UTIL.getFilename(copy.id), new Response(JSON.stringify(copy)))
+          .then((result) => {
+            //all good, update the sst
+            APP.data.sst[personIdx] = copy;
+            APP.navigate("gift_ideas");
+          })
+          .catch((err) => {
+            // console.error(err);
+          });
+      },
     },
     add_edit_gift: {
       id: "add_edit_gift",
@@ -396,6 +586,7 @@ const APP = {
         store: undefined,
         url: undefined,
         deleteBtn: undefined,
+        errorContainer: undefined,
       },
       getUserValues() {
         const dom = APP.pages.add_edit_gift.dom;
@@ -404,6 +595,9 @@ const APP = {
           store: dom.store.value.trim(),
           url: dom.url.value.trim(),
         };
+      },
+      removeError() {
+        APP.pages.add_edit_gift.dom.errorContainer.innerHTML = "";
       },
       readDom() {
         const dom = APP.pages.add_edit_gift.dom;
@@ -415,11 +609,17 @@ const APP = {
           dom.url = main.querySelector("#gift_url");
           dom.title = main.querySelector("h2");
           dom.deleteBtn = main.querySelector(".delete-btn");
+          dom.errorContainer = main.querySelector("#error-container");
         }
       },
       buildPage() {
+        APP.pages.add_edit_gift.removeError();
         const dom = APP.pages.add_edit_gift.dom;
-        dom.title.innerHTML = `Add Gift - ${APP.currentPerson.name}`;
+        let title = `Add Gift - ${APP.currentPerson.name}`;
+        if (APP.currentGift.newEntry === false) {
+          title = `Edit Gift - ${APP.currentGift.name} -  ${APP.currentPerson.name}`;
+        }
+        dom.title.innerHTML = title;
         dom.name.value = APP.currentGift.name;
         dom.store.value = APP.currentGift.store;
         dom.url.value = APP.currentGift.url;
@@ -433,6 +633,7 @@ const APP = {
         APP.currentGift = null;
         APP.navigate("gift_ideas");
       },
+
       saveNewGift(params) {
         const { dataSource } = params;
         const userValues = APP.pages.add_edit_gift.getUserValues();
@@ -455,6 +656,23 @@ const APP = {
         };
 
         let addGiftFilename = UTIL.getFilename(APP.currentPerson.id);
+        const personIdx = APP.data.sst.findIndex(
+          (person) => person.id === APP.currentPerson.id
+        );
+        let giftIdx = -1;
+        let personObj = null;
+
+        if (personIdx >= 0) {
+          personObj = { ...APP.data.sst[personIdx] };
+          giftIdx = personObj.gifts.findIndex(
+            (gift) => gift.id === APP.currentGift.id
+          );
+          if (giftIdx >= 0) {
+            personObj.gifts[giftIdx] = giftToAdd;
+          } else {
+            personObj.gifts.push(giftToAdd);
+          }
+        }
 
         APP.data.cacheRef
           .match(addGiftFilename)
@@ -463,28 +681,27 @@ const APP = {
               return matchResult.json();
             }
           })
-          .then((result) => {
-            if (result) {
-              result.gifts.push(giftToAdd);
+          .then((person) => {
+            //add it to cache before adding it to the array in memory
+            if (personObj) {
               return APP.data.cacheRef.put(
                 addGiftFilename,
-                new Response(JSON.stringify(result))
+                new Response(JSON.stringify(personObj))
               );
             }
-            return;
+            throw new Error("");
           })
-          .then((result) => {
-            if (result) {
-              // add the gift to the array
-              const idx = APP.data.sst.findIndex(
-                (person) => person.id === APP.currentPerson.id
-              );
-              if (idx >= 0) {
-                APP.data.sst[idx].gifts.push(giftToAdd);
-              }
-              APP.currentGift = null;
-              APP.navigate("gift_ideas");
+          .then((_) => {
+            //we were able to update the cache. It means we can update the array now
+            if (personObj) {
+              APP.data.sst[personIdx] = personObj;
             }
+            APP.currentGift = null;
+            APP.navigate("gift_ideas");
+          })
+          .catch((err) => {
+            // omit error
+            console.log(err);
           });
       },
     },
@@ -553,6 +770,13 @@ const APP = {
         break;
       case "list_gifts":
         APP.pages.gift_ideas.listGifts(params);
+        break;
+      case "delete_gift":
+        APP.pages.gift_ideas.deleteGift(params);
+        break;
+      case "edit_gift":
+        APP.pages.gift_ideas.editGift(params);
+
         break;
       case "cancel_new_gift":
         APP.pages.add_edit_gift.cancelNewGift();
@@ -693,25 +917,3 @@ function saveDummyDataIntoCache() {
     });
   });
 }
-
-//console.log(test_UserArray);
-
-//commented code
-// Promise.all(keys).then((keys) => {
-//   keys.forEach((personKey) => {
-//     cache
-//       .match(personKey)
-//       .then((cacheResult) => {
-//         if (cacheResult) {
-//           return cacheResult.json();
-//         }
-//       })
-//       .then((result) => {
-//         if (result) {
-//           APP.data.sst.push(result);
-//         }
-//       });
-//   });
-//   //right here
-//   console.log(APP.data.sst);
-// });

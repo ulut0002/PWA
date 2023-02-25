@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,700;1,400;1,700&family=Righteous&display=swap");
 
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0");
+
 /* CSS RESET */
 
 /* Box sizing rules */
@@ -204,8 +206,23 @@ h2.title {
   text-align: center;
 }
 
-.person--name {
+.list--item--text_xl {
   font-size: var(--font-h3);
+}
+
+.list--item--text_lg {
+  font-size: var(--font-h4);
+}
+
+.list--item--text {
+  font-size: var(--font-h6);
+}
+
+.list--item--text_small {
+  font-size: var(--font-small);
+}
+
+.person--name {
 }
 
 .person--dob {
@@ -372,25 +389,15 @@ body.add_edit_gift .container {
 }
 
 .gift--container {
-  list-style-type: none;
-  display: flex;
-  flex-direction: column;
+  /* list-style-type: none; */
+  /* display: flex; */
+  /* flex-direction: column; */
   /* gap: 2rem; */
 }
 
 .gift--container .gift--list--item {
-  /* margin-top: 1rem; */
-  border-top: 0.0625rem solid gray;
-  border-radius: 0.15rem;
-  display: grid;
   grid-template-columns: 1fr repeat(2, minmax(min-content, max-content));
   grid-template-rows: repeat(3, minmax(min-content, max-content));
-  /* grid-template-rows: repeat(3, 1fr); */
-
-  -webkit-border-radius: 0.15rem;
-  -moz-border-radius: 0.15rem;
-  -ms-border-radius: 0.15rem;
-  -o-border-radius: 0.15rem;
 }
 
 .gift--list--item .gift--name {
