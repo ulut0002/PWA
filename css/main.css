@@ -531,6 +531,12 @@ body.add_edit_gift .container {
     --font-h5: 1.2rem;
     --font-small: 0.883rem;
   }
+
+  main {
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 @media only screen and (min-width: 60rem) {
@@ -541,5 +547,10 @@ body.add_edit_gift .container {
     --font-h4: 1.563rem;
     --font-h5: 1.25rem;
     --font-small: 0.8rem;
+  }
+  main {
+    max-width: 60%;
+    margin-left: auto;
+    margin-right: auto;
   }
 }

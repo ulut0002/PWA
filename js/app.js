@@ -82,6 +82,14 @@ const DOM_UTIL = {
     const msg = document.querySelector(`div[msgId='${id}']`);
     if (msg) msg.remove();
   },
+  displayContactDeveloperError(errorContainerDiv) {
+    DOM_UTIL.displayError(
+      errorContainerDiv,
+      APP.MESSAGE.TITLE.UNEXPECTED,
+      APP.MESSAGE.BODY.DEVELOPER,
+      APP.MESSAGE.TYPE.ERROR
+    );
+  },
   displayError(errorContainerDiv, title, message, type) {
     if (!errorContainerDiv) {
       return;
@@ -106,8 +114,8 @@ const DOM_UTIL = {
       const el = document.createElement("h3");
       el.setAttribute("slot", "title");
       el.classList.add("list--item--text_small");
-      el.innerHTML = message;
-      p.append(el);
+      el.textContent = title;
+      msg.append(el);
     }
 
     const p = document.createElement("p");
@@ -130,13 +138,33 @@ const APP = {
   currentPage: "home",
   currentPerson: undefined,
   currentGift: undefined,
-  MESSAGES: {
-    ERROR: "error",
-    WARNING: "warning",
-    INFO: "info",
-    SUCCESS: "success",
-    DEV_ERROR_TITLE: "Attention to Developer",
-    DEV_ERROR_MESSAGE: "This error should not have happened. ",
+  MESSAGE: {
+    TITLE: {
+      UNEXPECTED: "Unexpected error!",
+      DEVELOPER: "Attention to Developer",
+      MANDATORY_FIELDS_MISSING: "Mandatory field(s) missing",
+      CACHE_FAILURE: "Cache failure",
+      RECORD_NOT_FOUND: "Record not found",
+    },
+    BODY: {
+      DEVELOPER: "Contact developer for this error.",
+      NAME_DOB_MISSING: "Enter a valid name and date of birth.",
+      GIFT_NAME_MISSING: "Enter a valid name for your gift",
+      NEW_PERSON_FAIL:
+        "An error happened while creating a new person. Try again later.",
+      DELETE_PERSON_FAIL:
+        "An error happened while deleting the person. Try again later.",
+      DELETE_GIFT_FAIL:
+        "An error happened while deleting the gift. Try again later.",
+      ENTRY_NOT_EXISTS:
+        "The record you want to retrieve no longer exists. Refresh the main page again.",
+    },
+    TYPE: {
+      ERROR: "error",
+      WARNING: "warning",
+      INFO: "info",
+      SUCCESS: "success",
+    },
   },
   CACHE: {
     dataCache: "ULUT0002_DATA",
@@ -296,9 +324,6 @@ const APP = {
       },
     },
     add_edit_person: {
-      MESSAGES: {
-        MANDATORY_FIELDS: "Enter valid name and date of birth",
-      },
       id: "add_edit_person",
       dom: {
         main: undefined,
@@ -358,9 +383,9 @@ const APP = {
         if (!APP.currentPerson) {
           DOM_UTIL.displayError(
             dom.errorContainer,
-            APP.MESSAGES.DEV_ERROR_TITLE,
-            APP.MESSAGES.DEV_ERROR_MESSAGE,
-            APP.MESSAGES.ERROR
+            APP.MESSAGE.TITLE.UNEXPECTED,
+            APP.MESSAGE.BODY.DEVELOPER,
+            APP.MESSAGE.TYPE.ERROR
           );
           return;
         }
@@ -386,11 +411,10 @@ const APP = {
           //return / show error
           DOM_UTIL.displayError(
             dom.errorContainer,
-            "",
-            APP.pages.add_edit_person.MESSAGES.MANDATORY_FIELDS,
-            APP.MESSAGES.ERROR
+            APP.MESSAGE.TITLE.MANDATORY_FIELDS_MISSING,
+            APP.MESSAGE.BODY.NAME_DOB_MISSING,
+            APP.MESSAGE.TYPE.ERROR
           );
-          console.log("name and dob are mandatory");
           return;
         }
 
@@ -415,15 +439,37 @@ const APP = {
             }
 
             APP.navigate("main");
+          })
+          .catch((err) => {
+            DOM_UTIL.displayError(
+              dom.errorContainer,
+              APP.MESSAGE.TITLE.CACHE_FAILURE,
+              APP.MESSAGE.BODY.NEW_PERSON_FAIL,
+              APP.MESSAGE.TYPE.ERROR
+            );
           });
       },
       downloadPerson(params) {
-        console.log("Not implemented");
+        const person = { ...APP.currentPerson };
+        delete person["newEntry"];
+        if (!person) return;
+
+        const filename = UTIL.getFilename(person.id);
+
+        let file = new File([JSON.stringify(person)], filename, {
+          type: "application/json",
+        });
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(file);
+        a.download = filename;
+        a.click();
       },
       deletePerson(params) {
         const { dataSource } = params;
+        const dom = APP.pages.add_edit_person.dom;
         if (!dataSource || !dataSource.dataset.id) {
-          //an error?
+          //This error should not happen
+          DOM_UTIL.displayContactDeveloperError(dom.errorContainer);
           return;
         }
         const id = dataSource.dataset.id;
@@ -431,16 +477,21 @@ const APP = {
         APP.data.cacheRef
           .delete(UTIL.getFilename(APP.currentPerson.id))
           .then((_) => {
-            console.log("deleted from cache");
-
-            idx = APP.data.sst.findIndex((person) => person.id === id);
+            const idx = APP.data.sst.findIndex((person) => person.id === id);
             if (idx >= 0) {
               APP.data.sst.splice(idx, 1);
             }
             APP.navigate("home");
+          })
+          .catch((err) => {
+            //almost impossible to catch
+            DOM_UTIL.displayError(
+              dom.errorContainer,
+              APP.MESSAGE.TITLE.CACHE_FAILURE,
+              APP.MESSAGE.BODY.DELETE_PERSON_FAIL,
+              APP.MESSAGE.TYPE.ERROR
+            );
           });
-
-        // console.log("delete id", dataSource.dataset.id);
       },
     },
     gift_ideas: {
@@ -469,6 +520,7 @@ const APP = {
         const dom = APP.pages.gift_ideas.dom;
         const container = dom.container;
         if (!container) {
+          DOM_UTIL.displayContactDeveloperError(dom.errorContainer);
           return;
         }
         let html = "";
@@ -517,6 +569,7 @@ const APP = {
         const { dataSource } = param;
         const giftID = dataSource.dataset.id;
         const personID = APP.currentPerson.id;
+        const dom = APP.pages.gift_ideas.dom;
 
         let giftIndex = -1;
 
@@ -524,7 +577,14 @@ const APP = {
           giftIndex = APP.currentPerson.gifts.findIndex(
             (gift) => gift.id === giftID
           );
-        } catch (error) {}
+        } catch (error) {
+          DOM_UTIL.displayError(
+            dom.errorContainer,
+            APP.MESSAGE.TITLE.UNEXPECTED,
+            APP.MESSAGE.BODY.ENTRY_NOT_EXISTS,
+            APP.MESSAGE.TYPE.ERROR
+          );
+        }
         //
         if (giftIndex >= 0) {
           APP.currentGift = {
@@ -540,9 +600,17 @@ const APP = {
         const { dataSource } = param;
         const giftID = dataSource.dataset.id;
         const personID = APP.currentPerson.id;
+        const dom = APP.pages.gift_ideas.dom;
+
         // console.log("delete gift id", dataSource.dataset.id, "from", personID);
         if (!giftID || !personID) {
           //display error
+          DOM_UTIL.displayError(
+            dom.errorContainer,
+            APP.MESSAGE.TITLE.RECORD_NOT_FOUND,
+            APP.MESSAGE.BODY.ENTRY_NOT_EXISTS,
+            APP.MESSAGE.TYPE.ERROR
+          );
           return;
         }
         const personIdx = APP.data.sst.findIndex(
@@ -551,6 +619,12 @@ const APP = {
 
         if (personIdx < 0) {
           //display error
+          DOM_UTIL.displayError(
+            dom.errorContainer,
+            APP.MESSAGE.TITLE.RECORD_NOT_FOUND,
+            APP.MESSAGE.BODY.ENTRY_NOT_EXISTS,
+            APP.MESSAGE.TYPE.ERROR
+          );
           return;
         }
 
@@ -560,7 +634,6 @@ const APP = {
         if (copy.gifts && Array.isArray(copy.gifts) && copy.gifts.length > 0) {
           giftIdx = copy.gifts.findIndex((gift) => (gift.id = giftID));
         }
-        // log(giftIdx, giftID);
         if (giftIdx >= 0) {
           copy.gifts.splice(giftIdx, 1);
         }
@@ -574,6 +647,12 @@ const APP = {
           })
           .catch((err) => {
             // console.error(err);
+            DOM_UTIL.displayError(
+              dom.errorContainer,
+              APP.MESSAGE.TITLE.CACHE_FAILURE,
+              APP.MESSAGE.BODY.DELETE_GIFT_FAIL,
+              APP.MESSAGE.TYPE.ERROR
+            );
           });
       },
     },
@@ -637,14 +716,21 @@ const APP = {
       saveNewGift(params) {
         const { dataSource } = params;
         const userValues = APP.pages.add_edit_gift.getUserValues();
+        const dom = APP.pages.add_edit_gift.dom;
 
         if (!userValues.name) {
-          // display error
+          DOM_UTIL.displayError(
+            dom.errorContainer,
+            APP.MESSAGE.TITLE.MANDATORY_FIELDS_MISSING,
+            APP.MESSAGE.BODY.GIFT_NAME_MISSING,
+            APP.MESSAGE.TYPE.ERROR
+          );
           return;
         }
 
         if (!APP.currentPerson.id) {
           // display error
+          DOM_UTIL.displayContactDeveloperError(dom.errorContainer);
           return;
         }
 
@@ -689,7 +775,7 @@ const APP = {
                 new Response(JSON.stringify(personObj))
               );
             }
-            throw new Error("");
+            throw new Error("Person entry could not be located");
           })
           .then((_) => {
             //we were able to update the cache. It means we can update the array now
@@ -700,8 +786,12 @@ const APP = {
             APP.navigate("gift_ideas");
           })
           .catch((err) => {
-            // omit error
-            console.log(err);
+            DOM_UTIL.displayError(
+              dom.errorContainer,
+              APP.MESSAGE.TITLE.UNEXPECTED,
+              err.message,
+              APP.MESSAGE.TYPE.ERROR
+            );
           });
       },
     },
@@ -861,59 +951,3 @@ const APP = {
 };
 
 document.addEventListener("DOMContentLoaded", APP.init);
-
-//################### TEST FUNCTIONS ################
-
-const test_UserArray = [];
-function testCreateDummyUsers() {
-  test_UserArray.push(test_createDummyUser("Jane Smith", "1969-03-03"));
-  test_UserArray.push(test_createDummyUser("Allison Cooper", "1976-04-05"));
-  test_UserArray.push(test_createDummyUser("Robert Duff", "1989-03-03"));
-  test_UserArray.push(test_createDummyUser("Jimmy Atkinson", "1977-02-09"));
-}
-function test_createDummyUser(name = "John Doe", dob = "1990-01-01") {
-  let person = {
-    id: crypto.randomUUID(),
-    name: name,
-    dob: Date.parse(dob),
-    gifts: [],
-  };
-  const numOfGifts = randomNum(2, 5);
-  for (let index = 0; index < numOfGifts; index++) {
-    person.gifts.push(test_createRandomGift());
-  }
-
-  return person;
-}
-
-function test_createRandomGift() {
-  const giftId = crypto.randomUUID();
-  return {
-    id: giftId,
-    name: `Gift #${giftId.substring(0, 2).toUpperCase()}`,
-    store: `Ground ${giftId.substring(4, 7).toUpperCase()}`,
-    url: `https://www.ground${giftId.substring(4, 7)}.com`,
-  };
-}
-
-function randomNum(min, max) {
-  // min and max included
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function saveUsersIntoCache() {
-  if (caches.has(APP.data.constants.user_cache)) {
-  }
-}
-
-// console.log("User: ", test_createDummyUser());
-
-function saveDummyDataIntoCache() {
-  test_UserArray.forEach((user) => {
-    caches.open(APP.CACHE.dataCache).then((cache) => {
-      if (cache) {
-        cache.put(`${user.id}.json`, new Response(JSON.stringify(user)));
-      }
-    });
-  });
-}
