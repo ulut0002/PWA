@@ -28,6 +28,7 @@ const UTIL = {
     let date;
     try {
       date = new Date(ms);
+
       log(`date`, date.toDateString());
     } catch (error) {
       log("error");
@@ -39,12 +40,25 @@ const UTIL = {
     log("today:", today);
     return today;
   },
+  getFilename(id) {
+    return `${id}.giftr`;
+  },
+};
+
+const DOM_UTIL = {
+  showHideDomElement(element, hide) {
+    if (!element) return;
+    if (!element.classList) return;
+    if (hide) element.classList.add("visually-hidden");
+    else element.classList.remove("visually-hidden");
+  },
 };
 
 const APP = {
   currentPage: "home",
   currentPerson: undefined,
-  constants: {
+  currentGift: undefined,
+  CACHE: {
     dataCache: "ULUT0002_DATA",
     pageCache: "ULUT0002_PAGE",
   },
@@ -53,22 +67,19 @@ const APP = {
   dom: {
     body: undefined,
     home_list: undefined,
-    add_edit_person: {
-      container: undefined,
+
+    add_edit_gift: {
+      main: undefined,
       title: undefined,
       name: undefined,
-      dob: undefined,
-    },
-    gift_ideas: {
-      main: undefined,
-      container: undefined,
-      title: undefined,
+      store: undefined,
+      url: undefined,
     },
   },
+  //single source of truth
   data: {
     cacheRef: undefined,
     sst: [],
-    //Single source of data
   },
   init() {
     //page has loaded
@@ -77,7 +88,7 @@ const APP = {
     APP.addListeners();
 
     //open cache, and load data into Single Source of Truth
-    caches.open(APP.constants.dataCache).then((cache) => {
+    caches.open(APP.CACHE.dataCache).then((cache) => {
       if (cache) {
         APP.data.cacheRef = cache;
         cache.keys().then((keys) => {
@@ -97,61 +108,64 @@ const APP = {
     });
   },
   readDOMElements() {
-    APP.dom.home_list = document.getElementById("people-list");
+    //each page stores their own dom elements for easier manipulation
     APP.dom.body = document.querySelector("body");
-    APP.dom.add_edit_person.container =
-      document.getElementById("add_edit_person");
-    APP.dom.gift_ideas.main = document.getElementById("gift_ideas");
-
-    //elements on the add_edit_person page
-    if (APP.dom.add_edit_person.container) {
-      const el = APP.dom.add_edit_person.container; //less text
-      APP.dom.add_edit_person.title = el.querySelector(".title");
-      APP.dom.add_edit_person.name = el.querySelector("#name");
-      APP.dom.add_edit_person.dob = el.querySelector("#dob");
-    }
-
-    if (APP.dom.gift_ideas.main) {
-      const el = APP.dom.gift_ideas.main;
-      APP.dom.gift_ideas.container = el.querySelector(".container");
-      APP.dom.gift_ideas.title = el.querySelector("h2");
-    }
+    APP.pages.home.readDom();
+    APP.pages.add_edit_person.readDom();
+    APP.pages.gift_ideas.readDom();
+    APP.pages.add_edit_gift.readDom();
   },
   addListeners() {
     document.addEventListener("click", APP.handleClick);
   },
   pages: {
     //helper functions to figure out which page we are on
-    isHomePage() {
-      return APP.currentPage === APP.pages.home.id;
-    },
-    isEditPersonPage() {
-      return APP.currentPage === APP.pages.add_edit_person.id;
-    },
-    isGiftListPage() {
-      return APP.currentPage === APP.pages.gift_ideas.id;
-    },
-    isGiftEditPage() {
-      return APP.currentPage === APP.pages.add_edit_gift.id;
+    isCurrentPage: {
+      homePage() {
+        return APP.currentPage === APP.pages.home.id;
+      },
+      editPersonPage() {
+        return APP.currentPage === APP.pages.add_edit_person.id;
+      },
+      giftListPage() {
+        return APP.currentPage === APP.pages.gift_ideas.id;
+      },
+      giftEditPage() {
+        return APP.currentPage === APP.pages.add_edit_gift.id;
+      },
     },
 
     //each unique page has their own id and functions
     home: {
       id: "home",
+      dom: {
+        main: undefined,
+        container: undefined,
+      },
+      readDom() {
+        const main = document.getElementById("home");
+        if (main) {
+          APP.pages.home.dom.main = main;
+          APP.pages.home.dom.container = main.querySelector("#home__container");
+        }
+      },
       rebuildList() {
-        if (!APP.dom.home_list) return;
-        APP.dom.home_list.innerHTML = "";
-        if (APP.data.sst && Array.isArray(APP.data.sst)) {
-          console.log("gifter list is not empty");
-          // console.log(APP.data.sst);
-
+        const container = APP.pages.home.dom.container;
+        let html = "";
+        if (!container) return;
+        container.innerHTML = "";
+        if (
+          APP.data.sst &&
+          Array.isArray(APP.data.sst) &&
+          APP.data.sst.length > 0
+        ) {
           APP.data.sst.sort((p1, p2) => {
             return (
               UTIL.convertToCurrentYear(p1.dob) -
               UTIL.convertToCurrentYear(p2.dob)
             );
           });
-          let html = `<ul class="person--container">`;
+          html = `<ul class="person--container">`;
           html += APP.data.sst
             .map((person) => {
               // console.log(pe);
@@ -172,61 +186,299 @@ const APP = {
             })
             .join(" ");
           html += "</ul>";
-          APP.dom.home_list.innerHTML = html;
+
           // console.log("html", html);
         } else {
-          console.log("giftr list is empty");
+          html = `<h3 class="empty--list-warning">Your list is empty. Click + button to add new entries</h3>`;
         }
+        container.innerHTML = html;
       },
     },
     add_edit_person: {
       id: "add_edit_person",
+      dom: {
+        main: undefined,
+        title: undefined,
+        name: undefined,
+        dob: undefined,
+        deleteBtn: undefined,
+        downloadBtn: undefined,
+      },
+      readDom() {
+        const main = document.getElementById("add_edit_person");
+        const dom = APP.pages.add_edit_person.dom;
+        if (main) {
+          dom.title = main.querySelector(".title");
+          dom.name = main.querySelector("#name");
+          dom.dob = main.querySelector("#dob");
+          dom.deleteBtn = main.querySelector(".delete-btn");
+          dom.downloadBtn = main.querySelector(".download-btn");
+          dom.main = main;
+        }
+      },
+      getName() {
+        const dom = APP.pages.add_edit_person.dom;
+        return dom.name.value.trim();
+      },
+      getDOB() {
+        const dom = APP.pages.add_edit_person.dom;
+        return dom.dob.value.trim();
+      },
       buildPage() {
-        if (!APP.dom.add_edit_person.container) {
-          // display error message
+        const dom = APP.pages.add_edit_person.dom;
+        dom.title.innerHTML = "Add New Person";
+        if (APP.currentPerson && APP.currentPerson.name) {
+          dom.title.innerHTML = `Edit ${APP.currentPerson.name}`;
+        }
+        dom.name.value = APP.currentPerson.name;
+        dom.main.setAttribute("data-id", APP.currentPerson.id);
+        dom.dob.value = "";
+        if (typeof APP.currentPerson.dob === "number")
+          dom.dob.value = UTIL.convertDOBtoDateInput(APP.currentPerson.dob);
+
+        DOM_UTIL.showHideDomElement(dom.deleteBtn, APP.currentPerson.newEntry);
+        DOM_UTIL.showHideDomElement(
+          dom.downloadBtn,
+          APP.currentPerson.newEntry
+        );
+      },
+      editPerson(params) {
+        const { dataSource } = params;
+        APP.assignCurrentPerson(dataSource.dataset.id);
+        if (!APP.currentPerson) {
+          //display error
+          return;
+        }
+        APP.navigate("add_edit_person");
+      },
+      newPerson(params) {
+        APP.assignCurrentPerson(null);
+        APP.navigate("add_edit_person");
+      },
+      saveNewPerson() {
+        const name = APP.pages.add_edit_person.getName();
+        const dobText = APP.pages.add_edit_person.getDOB();
+
+        let dob = undefined;
+        try {
+          dob = new Date(Date.parse(dobText));
+          //source: https://stackoverflow.com/questions/7556591/is-the-javascript-date-object-always-one-day-off
+          dob = dob.getTime() + Math.abs(dob.getTimezoneOffset() * 60000);
+        } catch (error) {}
+
+        if (!name || !dob) {
+          //return / show error
+          console.log("name and dob are mandatory");
           return;
         }
 
-        const el = APP.dom.add_edit_person;
+        APP.currentPerson.name = name;
+        APP.currentPerson.dob = dob;
 
-        if (APP.currentPerson && APP.currentPerson.name) {
-          el.title.innerHTML = `Edit ${APP.currentPerson.name}`;
-        } else {
-          el.title.innerHTML = "Add New Person";
+        delete APP.currentPerson["newEntry"];
+
+        APP.data.cacheRef
+          .put(
+            UTIL.getFilename(APP.currentPerson.id),
+            new Response(JSON.stringify(APP.currentPerson))
+          )
+          .then((_) => {
+            const idx = APP.data.sst.findIndex(
+              (person) => person.id === APP.currentPerson.id
+            );
+            if (idx >= 0) {
+              APP.data.sst[idx] = APP.currentPerson;
+            } else {
+              APP.data.sst.push(APP.currentPerson);
+            }
+
+            APP.navigate("main");
+          });
+      },
+      downloadPerson(params) {
+        console.log("Not implemented");
+      },
+      deletePerson(params) {
+        const { dataSource } = params;
+        if (!dataSource || !dataSource.dataset.id) {
+          //an error?
+          return;
         }
-        el.name.value = APP.currentPerson.name;
-        el.container.setAttribute("data-id", APP.currentPerson.id);
+        const id = dataSource.dataset.id;
 
-        el.dob.value = UTIL.convertDOBtoDateInput(APP.currentPerson.dob);
+        APP.data.cacheRef
+          .delete(UTIL.getFilename(APP.currentPerson.id))
+          .then((_) => {
+            console.log("deleted from cache");
 
-        //
+            idx = APP.data.sst.findIndex((person) => person.id === id);
+            if (idx >= 0) {
+              APP.data.sst.splice(idx, 1);
+            }
+            APP.navigate("home");
+          });
+
+        // console.log("delete id", dataSource.dataset.id);
       },
     },
     gift_ideas: {
       id: "gift_ideas",
+      dom: {
+        main: undefined,
+        container: undefined,
+        title: undefined,
+      },
+      readDom() {
+        const main = document.getElementById("gift_ideas");
+        if (main) {
+          APP.pages.gift_ideas.dom.main = main;
+          APP.pages.gift_ideas.dom.container = main.querySelector(".container");
+          APP.pages.gift_ideas.dom.title = main.querySelector("h2");
+        }
+      },
       buildPage() {
-        const container = APP.dom.gift_ideas.container;
+        const dom = APP.pages.gift_ideas.dom;
+        const container = dom.container;
         if (!container) {
           return;
         }
         let html = "";
-        APP.dom.gift_ideas.title.innerHTML = `Gift ideas for ${APP.currentPerson.name}`;
+        dom.title.innerHTML = `Gift ideas for ${APP.currentPerson.name}`;
         if (
           APP.currentPerson.gifts &&
           Array.isArray(APP.currentPerson.gifts) &&
           APP.currentPerson.gifts.length > 0
         ) {
-          html = "List gifts here";
+          html += `<ul class="gift--container">`;
+          html += APP.currentPerson.gifts
+            .map((gift) => {
+              return `<li data-giftr="data_source" data-id="${gift.id}" data-source="gift" class="gift--list--item" >
+                  <h2 class="gift--name">${gift.name}</h2>
+                  <h3 class="gift--store">${gift.store}</h3>
+                  <h3 class="gift--url">${gift.url}</h3>
+                  <div data-giftr_action="edit_gift" class="button--container edit--button--container">
+                    <span class="material-symbols-outlined btn  edit-btn">edit</span>
+                  </div>
+                  <div data-giftr_action="delete_gift" class="button--container delete--button--container">
+                  <span class="material-symbols-outlined btn gift-btn">delete</span>
+                  </div>
+                </li>`;
+            })
+            .join(" ");
+
+          html += "</ul>";
         } else {
           // there are no gifts
           html = "Gift list is empty";
         }
         container.innerHTML = html;
       },
+      listGifts(param) {
+        const { dataSource } = param;
+        APP.assignCurrentPerson(dataSource.dataset.id);
+        APP.navigate("gift_ideas");
+      },
     },
     add_edit_gift: {
       id: "add_edit_gift",
-      buildPage() {},
+      dom: {
+        main: undefined,
+        title: undefined,
+        name: undefined,
+        store: undefined,
+        url: undefined,
+        deleteBtn: undefined,
+      },
+      getUserValues() {
+        const dom = APP.pages.add_edit_gift.dom;
+        return {
+          name: dom.name.value.trim(),
+          store: dom.store.value.trim(),
+          url: dom.url.value.trim(),
+        };
+      },
+      readDom() {
+        const dom = APP.pages.add_edit_gift.dom;
+        const main = document.getElementById("add_edit_gift");
+        if (main) {
+          dom.main = main;
+          dom.name = main.querySelector("#gift_name");
+          dom.store = main.querySelector("#gift_store");
+          dom.url = main.querySelector("#gift_url");
+          dom.title = main.querySelector("h2");
+          dom.deleteBtn = main.querySelector(".delete-btn");
+        }
+      },
+      buildPage() {
+        const dom = APP.pages.add_edit_gift.dom;
+        dom.title.innerHTML = `Add Gift - ${APP.currentPerson.name}`;
+        dom.name.value = APP.currentGift.name;
+        dom.store.value = APP.currentGift.store;
+        dom.url.value = APP.currentGift.url;
+        DOM_UTIL.showHideDomElement(dom.deleteBtn, APP.currentGift.newEntry);
+      },
+      newGift() {
+        APP.assignCurrentGift(null, null);
+        APP.navigate("add_edit_gift");
+      },
+      cancelNewGift() {
+        APP.currentGift = null;
+        APP.navigate("gift_ideas");
+      },
+      saveNewGift(params) {
+        const { dataSource } = params;
+        const userValues = APP.pages.add_edit_gift.getUserValues();
+
+        if (!userValues.name) {
+          // display error
+          return;
+        }
+
+        if (!APP.currentPerson.id) {
+          // display error
+          return;
+        }
+
+        const giftToAdd = {
+          id: APP.currentGift.id,
+          name: userValues.name,
+          store: userValues.store,
+          url: userValues.url,
+        };
+
+        let addGiftFilename = UTIL.getFilename(APP.currentPerson.id);
+
+        APP.data.cacheRef
+          .match(addGiftFilename)
+          .then((matchResult) => {
+            if (matchResult) {
+              return matchResult.json();
+            }
+          })
+          .then((result) => {
+            if (result) {
+              result.gifts.push(giftToAdd);
+              return APP.data.cacheRef.put(
+                addGiftFilename,
+                new Response(JSON.stringify(result))
+              );
+            }
+            return;
+          })
+          .then((result) => {
+            if (result) {
+              // add the gift to the array
+              const idx = APP.data.sst.findIndex(
+                (person) => person.id === APP.currentPerson.id
+              );
+              if (idx >= 0) {
+                APP.data.sst[idx].gifts.push(giftToAdd);
+              }
+              APP.currentGift = null;
+              APP.navigate("gift_ideas");
+            }
+          });
+      },
     },
   },
 
@@ -250,6 +502,7 @@ const APP = {
         APP.currentPage = page;
         break;
       case "add_edit_gift":
+        APP.pages.add_edit_gift.buildPage();
         APP.dom.body.classList = page;
         APP.currentPage = page;
         break;
@@ -260,108 +513,56 @@ const APP = {
     }
   },
   handleClick(ev) {
-    //ev.preventDefault();
-    // const actionable = ev.target.closest(`[data-actionable="giftr"]`);
+    ev.preventDefault();
+    ev.stopPropagation();
     const actionable = ev.target.closest(`[data-giftr_action]`);
     const dataSource = ev.target.closest(`[data-giftr="data_source"]`);
     if (!actionable) return;
-    ev.stopPropagation();
 
-    // console.log(actionable);
-    // console.log(dataSet);
-    let actionToTake = actionable.dataset.giftr_action;
-    if (!actionToTake) return;
-    actionToTake = actionToTake.toLowerCase();
-    console.log("action to take", actionToTake);
-    switch (actionToTake) {
+    let requestedAction = actionable.dataset.giftr_action;
+    if (!requestedAction) return;
+    requestedAction = requestedAction.toLowerCase();
+    // console.log(
+    //   "Requested Action: ",
+    //   requestedAction,
+    //   "   Page:",
+    //   APP.currentPage
+    // );
+
+    const params = {
+      dataSource: dataSource,
+    };
+
+    switch (requestedAction) {
       case "edit_person":
-        APP.assignCurrentPerson(dataSource.dataset.id);
-        if (!APP.currentPerson) {
-          //display error
-          return;
-        }
-        APP.navigate("add_edit_person");
+        APP.pages.add_edit_person.editPerson(params);
         break;
       case "add_record":
-        console.log("current page: ", APP.currentPage);
-        // console.log("pa")
-        if (APP.pages.isHomePage()) {
-          APP.assignCurrentPerson(null);
-          APP.navigate("add_edit_person");
-        } else if (APP.pages.isGiftListPage()) {
-          APP.navigate("add_edit_gift");
-        }
+        if (APP.pages.isCurrentPage.homePage())
+          APP.pages.add_edit_person.newPerson();
+        else if (APP.pages.isCurrentPage.giftListPage())
+          APP.pages.add_edit_gift.newGift();
         break;
       case "list_gifts":
-        APP.assignCurrentPerson(dataSource.dataset.id);
-        APP.navigate("gift_ideas");
+        APP.pages.gift_ideas.listGifts(params);
+        break;
+      case "cancel_new_gift":
+        APP.pages.add_edit_gift.cancelNewGift();
+        break;
+      case "save_new_gift":
+        APP.pages.add_edit_gift.saveNewGift(params);
         break;
 
       case "save_person":
-        // Where: "Add/Edit person page"
-        const name = APP.dom.add_edit_person.name.value.trim();
-        const dobText = APP.dom.add_edit_person.dob.value.trim();
-
-        let dob;
-        try {
-          dob = new Date(Date.parse(dobText));
-        } catch (error) {}
-
-        if (!name || !dob) {
-          //return error
-        }
-
-        APP.currentPerson.name = name;
-
-        //source: https://stackoverflow.com/questions/7556591/is-the-javascript-date-object-always-one-day-off
-        APP.currentPerson.dob =
-          dob.getTime() + Math.abs(dob.getTimezoneOffset() * 60000);
-
-        APP.data.cacheRef
-          .put(
-            `${APP.currentPerson.id}.json`,
-            new Response(JSON.stringify(APP.currentPerson))
-          )
-          .then((result) => {
-            const idx = APP.data.sst.findIndex(
-              (person) => person.id === APP.currentPerson.id
-            );
-            if (idx >= 0) {
-              APP.data.sst[idx] = APP.currentPerson;
-            } else {
-              APP.data.sst.push(APP.currentPerson);
-            }
-
-            APP.navigate("main");
-          });
-
+        APP.pages.add_edit_person.saveNewPerson();
         break;
 
       case "download_person":
-        // Where: "Add/Edit person page"
-
+        APP.pages.add_edit_person.downloadPerson(params);
         break;
 
       case "delete_person":
-        // Where: "Add/Edit person page"
-        if (!dataSource || !dataSource.dataset.id) {
-          //an error?
-          return;
-        }
-        const id = dataSource.dataset.id;
-
-        APP.data.cacheRef.delete(`${id}.json`).then((_) => {
-          console.log("deleted from cache");
-
-          idx = APP.data.sst.findIndex((person) => person.id === id);
-          if (idx >= 0) {
-            APP.data.sst.splice(idx, 1);
-          }
-          APP.navigate("home");
-        });
-
-        // console.log("delete id", dataSource.dataset.id);
-
+        APP.pages.add_edit_person.deletePerson(params);
         break;
 
       case "cancel_add_edit_person":
@@ -369,11 +570,11 @@ const APP = {
         break;
 
       case "go_back":
-        if (APP.pages.isEditPersonPage()) {
-          APP.navigate("main");
-        } else if (APP.pages.isGiftListPage()) {
-          APP.navigate("main");
-        } else if (APP.pages.isGiftEditPage()) {
+        if (APP.pages.isCurrentPage.editPersonPage()) {
+          APP.navigate(APP.pages.home.id);
+        } else if (APP.pages.isCurrentPage.giftListPage()) {
+          APP.navigate(APP.pages.home.id);
+        } else if (APP.pages.isCurrentPage.giftEditPage()) {
           APP.navigate(APP.pages.gift_ideas.id);
         }
         break;
@@ -385,11 +586,13 @@ const APP = {
   },
   assignCurrentPerson(selectedId) {
     if (!selectedId) {
+      // const dummyDate = new Date(Date.parse("2000-01-01"));
       APP.currentPerson = {
         id: crypto.randomUUID(),
         name: "",
-        dob: Date.now(),
+        dob: "", //string on purpose
         gifts: [],
+        newEntry: true,
       };
       return;
     }
@@ -398,7 +601,30 @@ const APP = {
       APP.currentPerson = undefined;
       return;
     }
-    APP.currentPerson = { ...person };
+    APP.currentPerson = { ...person, newEntry: false };
+  },
+  assignCurrentGift(selectedGiftID) {
+    if (!selectedGiftID) {
+      APP.currentGift = {
+        id: crypto.randomUUID(),
+        name: "",
+        store: "",
+        url: "",
+        newEntry: true,
+      };
+      return;
+    }
+
+    // or find the selected gift on the current person
+    const idx = APP.currentPerson.gifts.findIndex(
+      (gift) => gift.id === selectedGiftID
+    );
+    if (idx < 0) {
+      //display error
+      return;
+    }
+    APP.currentGift = { ...APP.currentPerson.gifts[idx], newEntry: false };
+    return;
   },
 };
 
@@ -431,8 +657,8 @@ function test_createDummyUser(name = "John Doe", dob = "1990-01-01") {
 function test_createRandomGift() {
   const giftId = crypto.randomUUID();
   return {
-    gift_id: giftId,
-    text: `Gift #${giftId.substring(0, 2).toUpperCase()}`,
+    id: giftId,
+    name: `Gift #${giftId.substring(0, 2).toUpperCase()}`,
     store: `Ground ${giftId.substring(4, 7).toUpperCase()}`,
     url: `https://www.ground${giftId.substring(4, 7)}.com`,
   };
@@ -452,7 +678,7 @@ function saveUsersIntoCache() {
 
 function saveDummyDataIntoCache() {
   test_UserArray.forEach((user) => {
-    caches.open(APP.constants.dataCache).then((cache) => {
+    caches.open(APP.CACHE.dataCache).then((cache) => {
       if (cache) {
         cache.put(`${user.id}.json`, new Response(JSON.stringify(user)));
       }

@@ -32,14 +32,16 @@
       <p>
         <span class="back" data-giftr_action="go_back"> &lt; </span>
       </p>
-      <h1>Some App</h1>
+      <h1 class="title">Giftr App</h1>
       <p>
         <span class="add" data-giftr_action="add_record"> + </span>
       </p>
     </header>
     <main id="home">
-      <h2>Friends and Family</h2>
-      <div id="people-list" class="people-list"></div>
+      <h2 class="title">Friends and Family</h2>
+      <div id="home__container">
+        <!-- each user will be listed inside this div -->
+      </div>
     </main>
 
     <main id="add_edit_person" data-giftr="data_source">
@@ -55,22 +57,31 @@
           <input type="date" name="dob" id="dob" />
         </div>
 
-        <div class="text-btn save-btn" data-giftr_action="save_person">
+        <div
+          class="text-btn save-btn add_person_page_btn"
+          data-giftr_action="save_person"
+        >
           <span class="material-symbols-outlined text-btn-icon">save</span>Save
         </div>
-        <div class="text-btn delete-btn" data-giftr_action="delete_person">
+        <div
+          class="text-btn delete-btn add_person_page_btn"
+          data-giftr_action="delete_person"
+        >
           <span class="material-symbols-outlined text-btn-icon">delete</span
           >Delete
         </div>
 
         <div
-          class="text-btn cancel-btn"
+          class="text-btn cancel-btn add_person_page_btn"
           data-giftr_action="cancel_add_edit_person"
         >
           <span class="material-symbols-outlined text-btn-icon">cancel</span
-          >cancel
+          >Cancel
         </div>
-        <div class="text-btn download-btn" data-giftr_action="download_person">
+        <div
+          class="text-btn download-btn add_person_page_btn"
+          data-giftr_action="download_person"
+        >
           <span class="material-symbols-outlined text-btn-icon">download</span
           >Download
         </div>
@@ -96,17 +107,16 @@
           <input type="url" name="url" id="gift_url" />
         </div>
 
-        <div
-          class="text-btn cancel-btn"
-          data-giftr_action="cancel_add_edit_person"
-        >
+        <div class="text-btn save-btn" data-giftr_action="save_new_gift">
           <span class="material-symbols-outlined text-btn-icon">save</span>Save
         </div>
 
-        <div
-          class="text-btn cancel-btn"
-          data-giftr_action="cancel_add_edit_person"
-        >
+        <div class="text-btn delete-btn" data-giftr_action="delete_gift">
+          <span class="material-symbols-outlined text-btn-icon">delete</span
+          >Delete
+        </div>
+
+        <div class="text-btn cancel-btn" data-giftr_action="cancel_new_gift">
           <span class="material-symbols-outlined text-btn-icon">cancel</span
           >Cancel
         </div>

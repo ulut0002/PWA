@@ -1,16 +1,127 @@
-@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,700;1,400;1,700&family=Righteous&display=swap");
+
+/* CSS RESET */
+
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove default margin */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote,
+ul,
+ol,
+dl,
+dd {
+  /* margin: 0; */
+}
+
+/* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+}
+
+/* Set core root defaults */
+
+html {
+  font-family: Roboto, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+html:focus-within {
+  scroll-behavior: smooth;
+}
+
+/* A elements that don't have a class get default styles */
+a {
+  text-decoration-skip-ink: auto;
+  color: #36bf7f;
+}
+
+a:hover,
+a:focus {
+  color: #d96666;
+}
+
+/* Make images easier to work with */
+img,
+picture,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+svg {
+  fill: currentColor;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+/* Inherit fonts for inputs and buttons */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* CSS RESET ENDS */
 
 :root {
   --homebg: #e4e4e4;
   --hometxt: #222;
-  --add_edit_personbg: #222;
-  --add_edit_persontxt: #e4e4e4;
-  --gift_ideasbg: #f2f764;
-  --gift_ideastxt: #4c1c0f;
-  --add_edit_giftbg: #3398ef;
-  --add_edit_gifttxt: #d6e3ee;
-  --badass: #bada55;
+  --hometxt2: #5b3f02;
+
+  --add_edit_personbg: #d8d78f;
+  --add_edit_persontxt: #432c2b;
+  --add_edit_person_btn_bg1: #62418c;
+  --add_edit_person_btn_text1: #fffec2;
+
+  --gift_ideasbg: #c6edb3;
+  --gift_ideastxt: #5c3f46;
+
+  --add_edit_giftbg: #ccc9a1;
+  --add_edit_gifttxt: #280004;
+
+  --top_header_bg: #f4bb3f;
+  --top_header_txt: #302d4d;
+
+  --light-color-dark-bh: #979494;
+  --dark-color-light-bg: #5b2142;
+
   --defaultfontstack: Figtree, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+    sans-serif;
+
+  --headerfont: Righteous, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
     sans-serif;
 
@@ -40,6 +151,26 @@ html {
   font-weight: 300;
 }
 
+/* form related css. Copied from previous assignments */
+label,
+.label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  font-size: var(--font-h5);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
+  display: block;
+  width: 100%;
+  font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: 0.25em;
+  border: 0.125rem solid #ddd;
+}
+
 h1 {
   font-size: var(--font-h1);
 }
@@ -60,6 +191,25 @@ h5 {
   font-size: var(--font-h5);
 }
 
+h1.title {
+  font-family: var(--headerfont);
+  font-size: var(--font-h1);
+  letter-spacing: 0.3rem;
+}
+
+h2.title {
+  text-align: center;
+}
+
+.person--name {
+  font-size: var(--font-h3);
+}
+
+.person--dob {
+  font-size: var(--font-small);
+  color: var(--dark-color-light-bg);
+}
+
 body.home {
   background-color: var(--homebg);
   color: var(--hometxt);
@@ -78,7 +228,8 @@ body.add_edit_gift {
 }
 header {
   min-height: 4rem;
-  background-color: var(--badass);
+  background-color: var(--top_header_bg);
+
   position: fixed;
   top: 0;
   left: 0;
@@ -99,21 +250,23 @@ header span {
   background-color: #eee;
   border-radius: 50%;
   cursor: pointer;
+  color: var(--top_header_txt);
 }
 header h1 {
   font-size: 2rem;
   padding: 1rem 2rem;
-  color: #222;
+  color: var(--top_header_txt);
 }
 header p {
   display: grid;
   place-content: center;
   color: #222;
+  color: var(--top_header_txt);
 }
 main {
   min-height: 100vh;
   display: none; /* default */
-  padding: 5rem 1rem 1rem 1rem; /* 5rem to leave space for the header */
+  padding: 8rem 1rem 1rem 1rem; /* 5rem to leave space for the header */
 }
 body.home main#home,
 body.add_edit_person main#add_edit_person,
@@ -126,10 +279,16 @@ body.home header .back {
   display: none;
 }
 body.home header .add {
-  display: grid;
+  /* display: grid; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 body.add_edit_person header .back {
-  display: grid;
+  /* display: grid; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 body.add_edit_person header .add {
   display: none;
@@ -139,24 +298,46 @@ body.add_edit_person .container {
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: minmax(min-content, max-content);
-  /* flex-direction: column; */
+  row-gap: 1rem;
+}
+
+body.add_edit_gift .container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(min-content, max-content);
+  row-gap: 1rem;
+}
+
+.empty--list-warning {
+  font-size: var(--font-small);
 }
 
 .person--container {
   list-style-type: none;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  justify-content: center;
 }
 
 .person--container .person--list--item {
-  border: 1px solid gray;
+  /* margin-top: 1rem; */
+  border-top: 0.0625rem solid gray;
+  border-radius: 0.15rem;
   display: grid;
   grid-template-columns: 1fr repeat(2, minmax(min-content, max-content));
   grid-template-rows: repeat(2, minmax(min-content, max-content));
+  /*grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  */
+  -webkit-border-radius: 0.15rem;
+  -moz-border-radius: 0.15rem;
+  -ms-border-radius: 0.15rem;
+  -o-border-radius: 0.15rem;
+  padding: 1rem 0;
+}
 
-  /* grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr); */
+.person--container .person--list--item:hover {
+  background-color: lightgrey;
 }
 
 .person--container .person--name {
@@ -183,6 +364,52 @@ body.add_edit_person .container {
 .person--container .gift--button--container {
   grid-column: 3 / 4;
   grid-row: 1 / -1;
+}
+
+.gift--container {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  /* gap: 2rem; */
+}
+
+.gift--container .gift--list--item {
+  /* margin-top: 1rem; */
+  border-top: 0.0625rem solid gray;
+  border-radius: 0.15rem;
+  display: grid;
+  grid-template-columns: 1fr repeat(2, minmax(min-content, max-content));
+  grid-template-rows: repeat(3, minmax(min-content, max-content));
+  /* grid-template-rows: repeat(3, 1fr); */
+
+  -webkit-border-radius: 0.15rem;
+  -moz-border-radius: 0.15rem;
+  -ms-border-radius: 0.15rem;
+  -o-border-radius: 0.15rem;
+}
+
+.gift--list--item .gift--name {
+  grid-column: 1 /2;
+  grid-row: 1/2;
+}
+
+.gift--list--item .gift--store {
+  grid-column: 1 /2;
+  grid-row: 2/3;
+}
+.gift--list--item .gift--url {
+  grid-column: 1 / 2;
+  grid-row: 3/4;
+}
+
+.gift--list--item .edit--button--container {
+  grid-column: 2/3;
+  grid-row: 1/-1;
+}
+
+.gift--list--item .delete--button--container {
+  grid-column: 3/4;
+  grid-row: 1/-1;
 }
 
 /* btn person--edit--btn */
@@ -212,11 +439,27 @@ body.add_edit_person .container {
   justify-content: center;
   gap: 0.5rem;
   font-size: var(--font-h3);
+  cursor: pointer;
+  padding: 0.5rem 0;
+  /* font-weight: bold; */
 }
 
 .text-btn-icon {
   display: block;
+  /* font-weight: bold; */
   font-size: var(--font-h2);
+}
+
+.add_person_page_btn {
+  background-color: var(--add_edit_person_btn_bg1);
+  border: 0.0625rem solid var(--add_edit_person_btn_bg1);
+  color: var(--add_edit_person_btn_text1);
+}
+
+.add_person_page_btn:hover {
+  color: var(--add_edit_person_btn_bg1);
+  border: 0.0625rem solid var(--add_edit_person_btn_text1);
+  background-color: var(--add_edit_person_btn_text1);
 }
 
 .edit-btn {
@@ -237,6 +480,21 @@ body.add_edit_person .container {
 
 .gift-btn:hover {
   background-color: var(--gift-bg-color2);
+}
+
+/* ADD/EDIT PERSON PAGE */
+.name__container {
+  margin-top: 1rem;
+}
+
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 @media only screen and (min-width: 45rem) {
