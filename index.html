@@ -50,7 +50,7 @@
     </main>
 
     <main id="add_edit_person" data-giftr="data_source">
-      <div class="container">
+      <div class="container add_edit_person_container">
         <h2 class="title">Edit Person</h2>
 
         <div id="error-container" class="error__container"></div>
@@ -61,36 +61,38 @@
         </div>
         <div class="dob__container">
           <label for="dob">Date of Birth</label>
-          <input type="date" name="dob" id="dob" />
+          <input type="date" name="dob" id="dob" value="2000-01-01" />
         </div>
 
-        <div
-          class="text-btn save-btn add_person_page_btn"
-          data-giftr_action="save_person"
-        >
-          <span class="material-symbols-outlined text-btn-icon">save</span>Save
-        </div>
-        <div
-          class="text-btn delete-btn add_person_page_btn"
-          data-giftr_action="delete_person"
-        >
-          <span class="material-symbols-outlined text-btn-icon">delete</span
-          >Delete
-        </div>
-
-        <div
-          class="text-btn cancel-btn add_person_page_btn"
-          data-giftr_action="cancel_add_edit_person"
-        >
-          <span class="material-symbols-outlined text-btn-icon">cancel</span
-          >Cancel
-        </div>
-        <div
-          class="text-btn download-btn add_person_page_btn"
-          data-giftr_action="download_person"
-        >
-          <span class="material-symbols-outlined text-btn-icon">download</span
-          >Download
+        <div class="button__container">
+          <div
+            class="text-btn save-btn add_person_page_btn"
+            data-giftr_action="save_person"
+          >
+            <span class="material-symbols-outlined text-btn-icon">save</span
+            >Save
+          </div>
+          <div
+            class="text-btn delete-btn add_person_page_btn"
+            data-giftr_action="delete_person"
+          >
+            <span class="material-symbols-outlined text-btn-icon">delete</span
+            >Delete
+          </div>
+          <div
+            class="text-btn cancel-btn add_person_page_btn"
+            data-giftr_action="cancel_add_edit_person"
+          >
+            <span class="material-symbols-outlined text-btn-icon">cancel</span
+            >Cancel
+          </div>
+          <div
+            class="text-btn download-btn add_person_page_btn"
+            data-giftr_action="download_person"
+          >
+            <span class="material-symbols-outlined text-btn-icon">download</span
+            >Download
+          </div>
         </div>
       </div>
     </main>
@@ -101,10 +103,10 @@
       <div class="container"></div>
     </main>
     <main id="add_edit_gift">
-      <h2>Add Gift Screen</h2>
-      <div id="error-container" class="error__container"></div>
-      <div class="container">
-        <div class="idea_container">
+      <div class="container add_edit_gift_container">
+        <h2 class="title">Add Gift Screen</h2>
+        <div id="error-container" class="error__container"></div>
+        <div class="name_container">
           <label for="name">Gift idea</label>
           <input type="text" name="name" id="gift_name" />
         </div>
@@ -117,19 +119,22 @@
           <input type="url" name="url" id="gift_url" />
         </div>
 
-        <div
-          class="text-btn save-btn add_gift_page_btn"
-          data-giftr_action="save_new_gift"
-        >
-          <span class="material-symbols-outlined text-btn-icon">save</span>Save
-        </div>
+        <div class="button__container">
+          <div
+            class="text-btn save-btn add_gift_page_btn"
+            data-giftr_action="save_new_gift"
+          >
+            <span class="material-symbols-outlined text-btn-icon">save</span
+            >Save
+          </div>
 
-        <div
-          class="text-btn cancel-btn add_gift_page_btn"
-          data-giftr_action="cancel_new_gift"
-        >
-          <span class="material-symbols-outlined text-btn-icon">cancel</span
-          >Cancel
+          <div
+            class="text-btn cancel-btn add_gift_page_btn"
+            data-giftr_action="cancel_new_gift"
+          >
+            <span class="material-symbols-outlined text-btn-icon">cancel</span
+            >Cancel
+          </div>
         </div>
       </div>
     </main>

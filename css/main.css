@@ -327,7 +327,7 @@ body.add_edit_gift header .add {
 
 body.add_edit_person .container {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(12, 1fr);
   grid-template-rows: minmax(min-content, max-content);
   row-gap: 1rem;
 }
@@ -454,7 +454,6 @@ body.add_edit_gift .container {
 .text-btn {
   display: block;
   border: 1px solid black;
-  font-size: var(--font-h6);
   border-radius: 0.25rem;
   -webkit-border-radius: 0.25rem;
   -moz-border-radius: 0.25rem;
@@ -464,15 +463,17 @@ body.add_edit_gift .container {
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  font-size: var(--font-h3);
+  font-size: var(--font-h5);
   cursor: pointer;
   padding: 0.5rem 0;
   /* font-weight: bold; */
+  overflow: hidden;
+  flex-wrap: nowrap;
 }
 
 .text-btn-icon {
   display: block;
-  font-size: var(--font-h2);
+  font-size: var(--font-h4);
 }
 
 .home_page_btn {
@@ -535,7 +536,10 @@ body.add_edit_gift .container {
 
 /* ADD/EDIT PERSON PAGE */
 .name__container {
-  margin-top: 1rem;
+  /* margin-top: 1rem; */
+}
+
+.dob__container {
 }
 
 .visually-hidden {
@@ -546,6 +550,82 @@ body.add_edit_gift .container {
   position: absolute;
   white-space: nowrap;
   width: 1px;
+}
+
+/* .container .title {
+  grid-column: 1/-1;
+} */
+
+.add_edit_person_container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: minmax(min-content, max-content);
+  row-gap: 1rem;
+}
+
+.add_edit_person_container .title {
+  grid-column: 1/-1;
+}
+.add_edit_person_container .error__container {
+  grid-column: 1/-1;
+}
+
+.add_edit_person_container .name__container {
+  grid-column: 1/-1;
+}
+
+.add_edit_person_container .dob__container {
+  grid-column: 1/-1;
+}
+
+.add_edit_person_container .button__container {
+  grid-column: 1/-1;
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.add_edit_person_container .save-btn {
+}
+
+.add_edit_person_container .delete-btn {
+}
+
+.add_edit_person_container .cancel-btn {
+}
+
+.add_edit_person_container .download-btn {
+}
+
+.add_edit_gift_container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: minmax(min-content, max-content);
+  row-gap: 1rem;
+}
+
+.add_edit_gift_container .title {
+  grid-column: 1/-1;
+}
+.add_edit_gift_container .error__container {
+  grid-column: 1/-1;
+}
+
+.add_edit_gift_container .name__container {
+  grid-column: 1/-1;
+}
+
+.add_edit_gift_container .dob__container {
+  grid-column: 1/-1;
+}
+
+.add_edit_gift_container .button__container {
+  grid-column: 1/-1;
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 @media only screen and (min-width: 45rem) {
@@ -559,10 +639,52 @@ body.add_edit_gift .container {
   }
 
   main {
-    max-width: 80%;
+    max-width: min(100%, 60rem);
     margin-left: auto;
     margin-right: auto;
   }
+
+  /* add/edit person page, buttons section becomes a grid */
+
+  .add_edit_person_container .button__container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .add_edit_person_container .save-btn {
+    flex: 1;
+  }
+
+  .add_edit_person_container .delete-btn {
+    flex: 1;
+  }
+
+  .add_edit_person_container .cancel-btn {
+    flex: 1;
+  }
+
+  .add_edit_person_container .download-btn {
+    flex: 1;
+  }
+
+  .add_edit_gift_container .button__container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .add_edit_gift_container .save-btn {
+    flex: 1;
+  }
+
+  .add_edit_gift_container .cancel-btn {
+    flex: 1;
+  }
+
+  /* add_edit_gift_container */
 }
 
 @media only screen and (min-width: 60rem) {
@@ -575,8 +697,24 @@ body.add_edit_gift .container {
     --font-small: 0.8rem;
   }
   main {
-    max-width: 60%;
+    /* max-width: 60%; */
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .add_edit_person_container .save-btn {
+    /* flex: 20%; */
+  }
+
+  .add_edit_person_container .delete-btn {
+    /* flex: 20%; */
+  }
+
+  .add_edit_person_container .cancel-btn {
+    /* flex: 20%; */
+  }
+
+  .add_edit_person_container .download-btn {
+    /* flex: 20%; */
   }
 }

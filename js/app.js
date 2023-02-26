@@ -220,9 +220,7 @@ const APP = {
           });
         }
       })
-      .catch((err) => {
-        // TODO: Add error box here
-      });
+      .catch((err) => {});
   },
   registerWorker() {
     if (navigator.serviceWorker) {
@@ -494,6 +492,12 @@ const APP = {
         }
         const id = dataSource.dataset.id;
 
+        if (
+          !confirm(`Are you sure you want to delete ${APP.currentPerson.name}?`)
+        ) {
+          return;
+        }
+
         APP.data.cacheRef
           .delete(UTIL.getFilename(APP.currentPerson.id))
           .then((_) => {
@@ -654,8 +658,20 @@ const APP = {
         if (copy.gifts && Array.isArray(copy.gifts) && copy.gifts.length > 0) {
           giftIdx = copy.gifts.findIndex((gift) => (gift.id = giftID));
         }
+
+        let selectedGift;
         if (giftIdx >= 0) {
+          selectedGift = copy.gifts[giftIdx];
           copy.gifts.splice(giftIdx, 1);
+        }
+        if (selectedGift) {
+          if (
+            !confirm(
+              `Are you sure you want to delete ${selectedGift.name} from the current list?`
+            )
+          ) {
+            return;
+          }
         }
         APP.data.cacheRef
           .put(UTIL.getFilename(copy.id), new Response(JSON.stringify(copy)))
