@@ -47,7 +47,7 @@ html:focus-within {
 /* A elements that don't have a class get default styles */
 a {
   text-decoration-skip-ink: auto;
-  color: #36bf7f;
+  color: #213677;
 }
 
 a:hover,
@@ -110,6 +110,9 @@ select {
   --add_edit_person_btn_bg1: #62418c;
   --add_edit_person_btn_text1: #fffec2;
 
+  --add_edit_gift_btn_bg1: #273049;
+  --add_edit_gift_btn_text1: #5f74ac;
+
   --gift_ideasbg: #c6edb3;
   --gift_ideastxt: #5c3f46;
 
@@ -135,8 +138,8 @@ select {
   --edit-bg-color: hsl(139, 17%, 27%);
   --edit-bg-color2: hsl(139, 17%, 17%);
 
-  --gift-bg-color: hsl(281, 41%, 78%);
-  --gift-bg-color2: hsl(281, 41%, 68%);
+  --gift-bg-color: hsl(191, 44%, 17%);
+  --gift-bg-color2: hsl(191, 44%, 47%);
 
   --font-h1: 1.802rem;
   --font-h2: 1.602rem;
@@ -212,6 +215,10 @@ h2.title {
 
 .list--item--text_lg {
   font-size: var(--font-h4);
+}
+
+.list--item--text_lg2 {
+  font-size: var(--font-h5);
 }
 
 .list--item--text {
@@ -314,6 +321,10 @@ body.add_edit_person header .add {
   display: none;
 }
 
+body.add_edit_gift header .add {
+  display: none;
+}
+
 body.add_edit_person .container {
   display: grid;
   grid-template-columns: 1fr;
@@ -329,7 +340,9 @@ body.add_edit_gift .container {
 }
 
 .empty--list-warning {
-  font-size: var(--font-small);
+  font-size: var(--font-h4);
+  opacity: 0.5;
+  margin-top: 2rem;
 }
 
 .list--container {
@@ -487,6 +500,18 @@ body.add_edit_gift .container {
   background-color: var(--add_edit_person_btn_text1);
 }
 
+.add_gift_page_btn {
+  background-color: var(--add_edit_gift_btn_bg1);
+  border: 0.0625rem solid var(--add_edit_gift_btn_bg1);
+  color: var(--add_edit_person_btn_text1);
+}
+
+.add_gift_page_btn:hover {
+  color: var(--add_edit_gift_btn_bg1);
+  border: 0.0625rem solid var(--add_edit_person_btn_text1);
+  background-color: var(--add_edit_person_btn_text1);
+}
+
 .edit-btn {
   background-color: var(--edit-bg-color);
   border-color: var(--edit-bg-color);
@@ -497,13 +522,14 @@ body.add_edit_gift .container {
   background-color: var(--edit-bg-color2);
 }
 
-.gift-btn {
+.gift-page-btn {
   background-color: var(--gift-bg-color);
   border-color: var(--gift-bg-color);
-  color: var(--text-dark);
+  color: var(--text-light);
+  box-shadow: var(--btn-box-shadow);
 }
 
-.gift-btn:hover {
+.gift-page-btn:hover {
   background-color: var(--gift-bg-color2);
 }
 

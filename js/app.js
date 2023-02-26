@@ -1,9 +1,8 @@
-const log = console.log;
 import MessageBox from "./message.js";
 
 //Utility functions for the APP object
 const UTIL = {
-  //used in sort function
+  // converts each given year to 2023/mm/dd for sorting on main page
   convertToCurrentYear(ms) {
     let date1;
     try {
@@ -14,6 +13,7 @@ const UTIL = {
     }
     return date1.getTime();
   },
+  //converts birthday to "<month_text> <dd>" format: January 19
   getBirthDateText(ms) {
     try {
       const d1 = new Date(ms);
@@ -24,26 +24,26 @@ const UTIL = {
       return "DOB N/A";
     }
   },
+  //converts date to mmmm-yy-dd format for the input field
   convertDOBtoDateInput(ms) {
     //source: https://stackoverflow.com/questions/12346381/set-date-in-input-type-date
     let date;
     try {
       date = new Date(ms);
-
-      log(`date`, date.toDateString());
     } catch (error) {
-      log("error");
       return "";
     }
     const day = ("0" + date.getDate()).slice(-2);
     const month = ("0" + (date.getMonth() + 1)).slice(-2);
     const today = date.getFullYear() + "-" + month + "-" + day;
-    log("today:", today);
     return today;
   },
+  // returns the cache file request url
   getFilename(id) {
     return `${id}.giftr`;
   },
+  // used in gift-list page. If the user enters "walmart.ca", this is turned into real url
+  // so that <a> tag can be used properly.
   parseTextToURL(value) {
     if (!value) return "";
     if (typeof value !== "string") return "";
@@ -61,27 +61,32 @@ const UTIL = {
   },
 };
 
-//this must be on the root level to work with window["name"].("param") function call
+// Message-box component can communicate with the main page only through event dispatcher.
+// window["function_name"].("param") method did not work
+// check message.js for the CustomEvent dispatcher
 
 document.addEventListener("closeMessage", (ev) => {
   ev.stopPropagation();
   DOM_UTIL.closeMessage(ev.detail.msgId);
-  // console.log(ev.detail);
 });
 
-// Utilitiy functions for the DOM object
+// Utility functions for the DOM object
 const DOM_UTIL = {
+  //This is used to show/hide "delete" button on "new entry" and "edit entry" pages
+  // "new entry" page does not show the delete button
   showHideDomElement(element, hide) {
     if (!element) return;
     if (!element.classList) return;
     if (hide) element.classList.add("visually-hidden");
     else element.classList.remove("visually-hidden");
   },
+  //When user clicks "ok" button on an error message, it fires a custom event with the msgID
+  // This event is caught here (see "closeMessage" event listener), and the message is removed
   closeMessage(id) {
-    // console.log(`close message box with id ${id}`);
     const msg = document.querySelector(`div[msgId='${id}']`);
     if (msg) msg.remove();
   },
+  // A generic error message for unlikely, buggy errors
   displayContactDeveloperError(errorContainerDiv) {
     DOM_UTIL.displayError(
       errorContainerDiv,
@@ -90,6 +95,8 @@ const DOM_UTIL = {
       APP.MESSAGE.TYPE.ERROR
     );
   },
+  // displays an error message on the given container div.
+  // Note that each page has their own container-div element.
   displayError(errorContainerDiv, title, message, type) {
     if (!errorContainerDiv) {
       return;
@@ -98,7 +105,9 @@ const DOM_UTIL = {
     errorContainerDiv.innerHTML = "";
     errorContainerDiv.append(newErrorMsg);
   },
+
   createMessageElement(title, message, type) {
+    //each message box has their own unique id. The id is used in closeMessage function.
     const msgID = crypto.randomUUID();
     const wrapper = document.createElement("div");
     wrapper.setAttribute("msgId", msgID);
@@ -113,7 +122,7 @@ const DOM_UTIL = {
     if (title) {
       const el = document.createElement("h3");
       el.setAttribute("slot", "title");
-      el.classList.add("list--item--text_small");
+      el.classList.add("list--item--text_lg2");
       el.textContent = title;
       msg.append(el);
     }
@@ -168,52 +177,57 @@ const APP = {
   },
   CACHE: {
     dataCache: "ULUT0002_DATA",
-    pageCache: "ULUT0002_PAGE",
   },
 
-  //dom components for each object
+  // only "body" element is part of APP.dom.
+  // other pages has their own "dom" object
   dom: {
     body: undefined,
-    home_list: undefined,
-
-    add_edit_gift: {
-      main: undefined,
-      title: undefined,
-      name: undefined,
-      store: undefined,
-      url: undefined,
-    },
   },
-  //single source of truth
+
+  // single source of truth array
+  // sst array contains the list of people.
+  // every cache operation on cacheRef is reflected on sst array upon successful result
   data: {
     cacheRef: undefined,
     sst: [],
   },
+
   init() {
-    //page has loaded
-    //read dom elements
+    //page has loaded. Read dom elements on each page and add action listener
+    APP.registerWorker();
     APP.readDOMElements();
     APP.addListeners();
 
     //open cache, and load data into Single Source of Truth
-    caches.open(APP.CACHE.dataCache).then((cache) => {
-      if (cache) {
-        APP.data.cacheRef = cache;
-        cache.keys().then((keys) => {
-          const resultPromiseArr = keys.map((key) => {
-            return cache.match(key).then((matchResult) => {
-              return matchResult.json();
+    caches
+      .open(APP.CACHE.dataCache)
+      .then((cache) => {
+        if (cache) {
+          APP.data.cacheRef = cache;
+          cache.keys().then((keys) => {
+            const resultPromiseArr = keys.map((key) => {
+              return cache.match(key).then((matchResult) => {
+                return matchResult.json();
+              });
+            });
+            Promise.all(resultPromiseArr).then((people) => {
+              people.forEach((person) => {
+                APP.data.sst.push(person);
+              });
+              APP.navigate("");
             });
           });
-          Promise.all(resultPromiseArr).then((people) => {
-            people.forEach((person) => {
-              APP.data.sst.push(person);
-            });
-            APP.navigate("");
-          });
-        });
-      }
-    });
+        }
+      })
+      .catch((err) => {
+        // TODO: Add error box here
+      });
+  },
+  registerWorker() {
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.register("./sw.js");
+    }
   },
   readDOMElements() {
     //each page stores their own dom elements for easier manipulation
@@ -224,6 +238,8 @@ const APP = {
     APP.pages.add_edit_gift.readDom();
   },
   addListeners() {
+    // system listens to each click on the page.
+    // each clicks checks the closest attribute: "data-giftr_action"
     document.addEventListener("click", APP.handleClick);
   },
   pages: {
@@ -243,7 +259,12 @@ const APP = {
       },
     },
 
-    //each unique page has their own id and functions
+    // 'pages' object has:
+    // 1. pages.home
+    // 2. pages.add_edit_person
+    // 3. pages.gift_ideas
+    // 4. pages.add_edit_gift objects,
+    // each unique page has their own id, dom objects and relevant functions
     home: {
       id: "home",
       dom: {
@@ -260,9 +281,11 @@ const APP = {
             main.querySelector("#error-container");
         }
       },
+      //When the page is reloaded, any existing error is removed from the page
       removeError() {
         APP.pages.home.dom.errorContainer.innerHTML = "";
       },
+      // builds the people-list
       rebuildList() {
         APP.pages.home.removeError();
         const container = APP.pages.home.dom.container;
@@ -284,7 +307,6 @@ const APP = {
           html = `<ul class="list--container person--container">`;
           html += APP.data.sst
             .map((person) => {
-              // console.log(pe);
               let giftCount = Array.isArray(person.gifts)
                 ? person.gifts.length
                 : 0;
@@ -315,10 +337,8 @@ const APP = {
             })
             .join(" ");
           html += "</ul>";
-
-          // console.log("html", html);
         } else {
-          html = `<h3 class="empty--list-warning">Your list is empty. Click + button to add new entries</h3>`;
+          html = `<h3 class="empty--list-warning">Why is gift list empty? Click + button to add new people!</h3>`;
         }
         container.innerHTML = html;
       },
@@ -454,7 +474,7 @@ const APP = {
         delete person["newEntry"];
         if (!person) return;
 
-        const filename = UTIL.getFilename(person.id);
+        const filename = `${person.name}_${UTIL.getFilename(person.id)}`;
 
         let file = new File([JSON.stringify(person)], filename, {
           type: "application/json",
@@ -544,10 +564,10 @@ const APP = {
                   <h3 class="list--item--text_small gift--store">Store: ${gift.store}</h3>
                   <h3 class="list--item--text_small gift--url">${href}</h3>
                   <div data-giftr_action="edit_gift" class="button--container edit--button--container">
-                    <span class="material-symbols-outlined btn  edit-btn">edit</span>
+                    <span class="material-symbols-outlined btn  gift-page-btn">edit</span>
                   </div>
                   <div data-giftr_action="delete_gift" class="button--container delete--button--container">
-                  <span class="material-symbols-outlined btn gift-btn">delete</span>
+                  <span class="material-symbols-outlined btn gift-page-btn">delete</span>
                   </div>
                 </li>`;
             })
@@ -556,7 +576,8 @@ const APP = {
           html += "</ul>";
         } else {
           // there are no gifts
-          html = "Gift list is empty";
+
+          html = `<h3 class="empty--list-warning">Why don't you click the plus (+) button, and add gifts ideas for ${APP.currentPerson.name}?</h3>`;
         }
         container.innerHTML = html;
       },
@@ -602,7 +623,6 @@ const APP = {
         const personID = APP.currentPerson.id;
         const dom = APP.pages.gift_ideas.dom;
 
-        // console.log("delete gift id", dataSource.dataset.id, "from", personID);
         if (!giftID || !personID) {
           //display error
           DOM_UTIL.displayError(
@@ -637,7 +657,6 @@ const APP = {
         if (giftIdx >= 0) {
           copy.gifts.splice(giftIdx, 1);
         }
-        // console.log(copy.gifts);
         APP.data.cacheRef
           .put(UTIL.getFilename(copy.id), new Response(JSON.stringify(copy)))
           .then((result) => {
@@ -837,12 +856,6 @@ const APP = {
     let requestedAction = actionable.dataset.giftr_action;
     if (!requestedAction) return;
     requestedAction = requestedAction.toLowerCase();
-    // console.log(
-    //   "Requested Action: ",
-    //   requestedAction,
-    //   "   Page:",
-    //   APP.currentPage
-    // );
 
     const params = {
       dataSource: dataSource,

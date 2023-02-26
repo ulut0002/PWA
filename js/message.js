@@ -3,6 +3,7 @@ const template = document.createElement("template");
 template.innerHTML = `
     <style>
 
+
     @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0");
 
     :host {
@@ -54,18 +55,15 @@ template.innerHTML = `
         background-color: var(--bg-warning);
       }
 
-      .title{
-        font-size: 2rem;
-      }
-
-      .actions{
-        // text-align: c;
+      button{
+        padding: 0.25rem 2rem;
       }
 
       .message__container{
-        // flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
       }
-      
 
     /* You can use ::slotted() to style the injected content. */
     </style>
