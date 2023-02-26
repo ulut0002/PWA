@@ -1,7 +1,7 @@
 {
-  "name": "Giftr APP by Serdar",
-  "short_name": "Giftr by Serdar",
-  "description": "Record your gift ideas without a hassle",
+  "name": "Giftr",
+  "short_name": "Never miss a good gift idea",
+  "description": "Use this app to keep record of your gift ideas",
   "orientation": "portrait-primary",
   "theme_color": "#5F74AC",
   "background_color": "#F7F6F0",
