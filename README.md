@@ -6,13 +6,7 @@ Welcome to the PWA Project! This is a class assignment that focuses on service w
 
 - [About the Project](#about-the-project)
 - [Features](#features)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
 - [License](#license)
-- [Contact](#contact)
 
 ## About the Project
 
